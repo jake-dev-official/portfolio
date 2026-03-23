@@ -15,7 +15,7 @@
   },
   {
     "title": "Nextgen CFO",
-    "description": "A modern financial dashboard for CFOs, built with React and a modern UI library to provide key insights.",
+    "description": "A modern CFO website, built with React and a modern UI library to provide key insights.",
     "imageUrl": "/projects/nextgen.png",
     "liveUrl": "https://nextgencfo.netlify.app/",
     "githubUrl": "#"
