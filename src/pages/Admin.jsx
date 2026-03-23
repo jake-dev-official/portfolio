@@ -100,7 +100,10 @@ const Admin = () => {
             description: newProject.description,
             imageUrl: newProject.imageUrl,
             liveUrl: newProject.liveUrl || '#',
-            githubUrl: newProject.githubUrl || '#'
+            githubUrl: newProject.githubUrl || '#',
+            // Preserve upload data for the Sync step
+            _pendingImageBase64: newProject.imageFileBase64,
+            _pendingImageName: newProject.imageFileName
         };
 
         if (editingIndex !== null) {
@@ -154,28 +157,36 @@ const Admin = () => {
             const octokit = getOctokit();
             const [owner, _repo] = repo.split('/');
 
-            // Optional: upload image first if exists
-            if (newProject.imageFileBase64) {
-                setMessage('Uploading new image...');
-                // Let's try to get image SHA if it exists to overwrite it, otherwise just create it
-                let imageSha = null;
-                try {
-                    const res = await octokit.rest.repos.getContent({ owner, repo: _repo, path: `public/projects/${newProject.imageFileName}` });
-                    imageSha = res.data.sha;
-                } catch (e) { /* file doesn't exist, which is fine */ }
+            // 1. Scan for any projects with pending images and upload them
+            for (const proj of projects) {
+                if (proj._pendingImageBase64 && proj._pendingImageName) {
+                    setMessage(`Uploading image: ${proj._pendingImageName}...`);
+                    let imageSha = null;
+                    try {
+                        const res = await octokit.rest.repos.getContent({ 
+                            owner, 
+                            repo: _repo, 
+                            path: `public/projects/${proj._pendingImageName}` 
+                        });
+                        imageSha = res.data.sha;
+                    } catch (e) { /* New file */ }
 
-                await octokit.rest.repos.createOrUpdateFileContents({
-                    owner,
-                    repo: _repo,
-                    path: `public/projects/${newProject.imageFileName}`,
-                    message: `Add image for ${newProject.title}`,
-                    content: newProject.imageFileBase64,
-                    sha: imageSha || undefined
-                });
+                    await octokit.rest.repos.createOrUpdateFileContents({
+                        owner,
+                        repo: _repo,
+                        path: `public/projects/${proj._pendingImageName}`,
+                        message: `Upload image for ${proj.title}`,
+                        content: proj._pendingImageBase64,
+                        sha: imageSha || undefined
+                    });
+                }
             }
 
+            // 2. Prepare clean JSON (strip out the heavy base64 strings)
             setMessage('Saving projects.json...');
-            const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(projects, null, 2))));
+            const cleanProjects = projects.map(({ _pendingImageBase64, _pendingImageName, ...rest }) => rest);
+            
+            const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(cleanProjects, null, 2))));
             const { data } = await octokit.rest.repos.createOrUpdateFileContents({
                 owner,
                 repo: _repo,
@@ -186,6 +197,8 @@ const Admin = () => {
             });
 
             setFileSha(data.content.sha);
+            // Update local state to remove the pending flags
+            setProjects(cleanProjects);
             setMessage('Successfully saved to GitHub! Deployment should start automatically.');
             setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '' });
         } catch (err) {
