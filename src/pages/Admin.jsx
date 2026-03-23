@@ -212,7 +212,7 @@ const Admin = () => {
                         <div className="grid grid-cols-1 gap-4">
                             {projects.map((proj, idx) => (
                                 <div key={idx} className="flex items-center bg-gray-700 p-4 rounded gap-4">
-                                    {proj.imageUrl && <img src={`${import.meta.env.BASE_URL}${proj.imageUrl.replace(/^\//, '')}`} alt="preview" className="w-24 h-16 object-cover rounded" />}
+                                    {proj.imageUrl && <img src={proj.imageUrl.startsWith('/') ? proj.imageUrl.substring(1) : proj.imageUrl} alt="preview" className="w-24 h-16 object-cover rounded" />}
                                     <div className="flex-1">
                                         <h3 className="font-bold">{proj.title}</h3>
                                         <p className="text-sm text-gray-400 truncate">{proj.description}</p>

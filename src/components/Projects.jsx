@@ -20,9 +20,15 @@ const Projects = () => {
   const [projects, setProjects] = useState([]);
 
   useEffect(() => {
-    fetch(`${import.meta.env.BASE_URL}data/projects.json`.replace('//', '/'))
+    fetch('data/projects.json')
       .then(res => res.json())
-      .then(data => setProjects(data))
+      .then(data => {
+        const fixedData = data.map(p => ({
+          ...p,
+          imageUrl: p.imageUrl.startsWith('/') ? p.imageUrl.substring(1) : p.imageUrl
+        }));
+        setProjects(fixedData);
+      })
       .catch(err => console.error("Error loading projects: ", err));
   }, []);
 
@@ -46,7 +52,7 @@ const Projects = () => {
               transition={{ duration: 0.3 }}
             >
               <img
-                src={`${import.meta.env.BASE_URL}${project.imageUrl.replace(/^\//, '')}`}
+                src={project.imageUrl}
                 alt={project.title}
                 className="w-full h-56 object-cover"
               />
