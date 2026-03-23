@@ -12,24 +12,22 @@ const NotFound = () => {
                 transition={{ duration: 0.5 }}
             >
                 <h1 className="text-9xl font-bold text-gray-800 mb-4 tracking-tighter shadow-none">404</h1>
-                <h2 className="text-4xl font-bold mb-6 underline decoration-blue-500 decoration-4 underline-offset-8">Page Not Found</h2>
-                <p className="text-gray-400 max-w-md mb-10 text-lg leading-relaxed">
-                    The project or page you are looking for has been moved, deleted, or is temporarily unavailable.
+                <h2 className="text-4xl font-bold mb-6 text-gray-100">Page Not Found</h2>
+                <p className="text-gray-400 max-w-md mb-12 text-lg">
+                    The page you are looking for is unavailable.
                 </p>
 
                 <Link
                     to="/"
-                    className="group flex flex-col items-center justify-center transition-transform hover:scale-105"
+                    className="group inline-flex flex-col items-center justify-center transition-transform hover:scale-105"
+                    title="Return to Portfolio"
                 >
                     <img
                         src={logo}
                         alt="JAKE"
-                        className="h-24 mb-6 opacity-90 group-hover:opacity-100 drop-shadow-lg"
+                        className="h-20 opacity-80 group-hover:opacity-100 drop-shadow-xl transition-opacity duration-300"
                         onError={(e) => e.target.style.display = 'none'}
                     />
-                    <span className="bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-lg font-bold shadow-lg border border-blue-400/20">
-                        Return to Portfolio
-                    </span>
                 </Link>
             </motion.div>
 
