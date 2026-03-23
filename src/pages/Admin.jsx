@@ -3,6 +3,16 @@ import { Octokit } from '@octokit/rest';
 import { FaTrash, FaPlus, FaSave, FaSignOutAlt, FaEdit } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 
+const DarkSwal = Swal.mixin({
+    background: '#1f2937', // bg-gray-800
+    color: '#ffffff',
+    confirmButtonColor: '#2563eb', // bg-blue-600
+    cancelButtonColor: '#4b5563', // bg-gray-600
+    customClass: {
+        popup: 'border border-gray-700 shadow-2xl rounded-xl'
+    }
+});
+
 const Admin = () => {
     const [token, setToken] = useState(localStorage.getItem('github_token') || '');
     const [repo, setRepo] = useState(localStorage.getItem('github_repo') || '');
@@ -82,7 +92,7 @@ const Admin = () => {
 
     const addProject = () => {
         if (!newProject.title) {
-            Swal.fire('Error', 'Project title is required!', 'error');
+            DarkSwal.fire('Error', 'Project title is required!', 'error');
             return;
         }
         const projectToAdd = {
@@ -99,22 +109,21 @@ const Admin = () => {
             setProjects(updatedProjects);
             setEditingIndex(null);
             setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '' });
-            Swal.fire('Updated!', 'Project modified locally. Remember to click Sync!', 'success');
+            DarkSwal.fire('Updated!', 'Project modified locally. Remember to click Sync!', 'success');
         } else {
             setProjects([projectToAdd, ...projects]);
             setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '' });
-            Swal.fire('Added!', 'New project added locally. Remember to click Sync!', 'success');
+            DarkSwal.fire('Added!', 'New project added locally. Remember to click Sync!', 'success');
         }
     };
 
     const deleteProject = (index) => {
-        Swal.fire({
+        DarkSwal.fire({
             title: 'Delete this project?',
             text: "It will be removed locally. Click 'Sync & Deploy' to finalize.",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
+            confirmButtonColor: '#dc2626', // bg-red-600 overrides the default blue mixin
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
@@ -122,7 +131,7 @@ const Admin = () => {
                 newProjects.splice(index, 1);
                 setProjects(newProjects);
                 if (editingIndex === index) cancelEdit();
-                Swal.fire('Deleted!', 'Project removed locally. Remember to click Sync!', 'success');
+                DarkSwal.fire('Deleted!', 'Project removed locally. Remember to click Sync!', 'success');
             }
         });
     };
