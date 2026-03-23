@@ -1,51 +1,58 @@
 [
-    {
-        "title": "Ada Technical Institute",
-        "description": "A corporate learning and assessment platform for a technical institute, focusing on user experience and performance.",
-        "imageUrl": "/projects/adatech.png",
-        "liveUrl": "https://adatech.infy.uk/?i=1",
-        "githubUrl": "#"
-    },
-    {
-        "title": "Nextgen CFO",
-        "description": "A modern financial dashboard for CFOs, built with React and a modern UI library to provide key insights.",
-        "imageUrl": "/projects/nextgen.png",
-        "liveUrl": "https://nextgencfo.netlify.app/",
-        "githubUrl": "#"
-    },
-    {
-        "title": "SkyGlow Construction",
-        "description": "A professional website for a construction company, showcasing their portfolio and services.",
-        "imageUrl": "/projects/skyglow.png",
-        "liveUrl": "#",
-        "githubUrl": "#"
-    },
-    {
-        "title": "Logi Transport Hub",
-        "description": "A logistics and transportation management system for tracking shipments and managing fleets.",
-        "imageUrl": "/projects/logitransport.png",
-        "liveUrl": "#",
-        "githubUrl": "#"
-    },
-    {
-        "title": "Feedback Hub 360",
-        "description": "A comprehensive feedback management system built with React, FastAPI, and PostgreSQL with Prisma ORM for organizational feedback collection and analysis.",
-        "imageUrl": "/projects/feedbackhub360.png",
-        "liveUrl": "#",
-        "githubUrl": "https://github.com/jake-dev-official/Feedback-Hub-360"
-    },
-    {
-        "title": "Sales & Inventory Management",
-        "description": "An offline-capable inventory system built with Python and Tkinter. Features product management, sales processing with real-time stock validation, PDF invoice generation, and debt tracking.",
-        "imageUrl": "/projects/salesinventory.png",
-        "liveUrl": "#",
-        "githubUrl": "https://github.com/jake-dev-official/sales-inventory"
-    },
-    {
-        "title": "JAKE Retro Download Manager",
-        "description": "A desktop application built with Python for managing and accelerating file downloads with a retro UI.",
-        "imageUrl": "/projects/retromanager.png",
-        "liveUrl": "#",
-        "githubUrl": "#"
-    }
+  {
+    "title": "Test",
+    "description": "",
+    "imageUrl": "/projects/Screenshot_2026-03-21_101102.png",
+    "liveUrl": "#",
+    "githubUrl": "#"
+  },
+  {
+    "title": "Ada Technical Institute",
+    "description": "A corporate learning and assessment platform for a technical institute, focusing on user experience and performance.",
+    "imageUrl": "/projects/adatech.png",
+    "liveUrl": "https://adatech.infy.uk/?i=1",
+    "githubUrl": "#"
+  },
+  {
+    "title": "Nextgen CFO",
+    "description": "A modern financial dashboard for CFOs, built with React and a modern UI library to provide key insights.",
+    "imageUrl": "/projects/nextgen.png",
+    "liveUrl": "https://nextgencfo.netlify.app/",
+    "githubUrl": "#"
+  },
+  {
+    "title": "SkyGlow Construction",
+    "description": "A professional website for a construction company, showcasing their portfolio and services.",
+    "imageUrl": "/projects/skyglow.png",
+    "liveUrl": "#",
+    "githubUrl": "#"
+  },
+  {
+    "title": "Logi Transport Hub",
+    "description": "A logistics and transportation management system for tracking shipments and managing fleets.",
+    "imageUrl": "/projects/logitransport.png",
+    "liveUrl": "#",
+    "githubUrl": "#"
+  },
+  {
+    "title": "Feedback Hub 360",
+    "description": "A comprehensive feedback management system built with React, FastAPI, and PostgreSQL with Prisma ORM for organizational feedback collection and analysis.",
+    "imageUrl": "/projects/feedbackhub360.png",
+    "liveUrl": "#",
+    "githubUrl": "https://github.com/jake-dev-official/Feedback-Hub-360"
+  },
+  {
+    "title": "Sales & Inventory Management",
+    "description": "An offline-capable inventory system built with Python and Tkinter. Features product management, sales processing with real-time stock validation, PDF invoice generation, and debt tracking.",
+    "imageUrl": "/projects/salesinventory.png",
+    "liveUrl": "#",
+    "githubUrl": "https://github.com/jake-dev-official/sales-inventory"
+  },
+  {
+    "title": "JAKE Retro Download Manager",
+    "description": "A desktop application built with Python for managing and accelerating file downloads with a retro UI.",
+    "imageUrl": "/projects/retromanager.png",
+    "liveUrl": "#",
+    "githubUrl": "#"
+  }
 ]
