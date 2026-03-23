@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Octokit } from '@octokit/rest';
-import { FaTrash, FaPlus, FaSave, FaSignOutAlt } from 'react-icons/fa';
+import { FaTrash, FaPlus, FaSave, FaSignOutAlt, FaEdit } from 'react-icons/fa';
+import Swal from 'sweetalert2';
 
 const Admin = () => {
     const [token, setToken] = useState(localStorage.getItem('github_token') || '');
@@ -10,6 +11,8 @@ const Admin = () => {
     const [fileSha, setFileSha] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
+    const [editingIndex, setEditingIndex] = useState(null);
+    const formRef = useRef(null);
 
     // Form State
     const [newProject, setNewProject] = useState({
@@ -78,7 +81,10 @@ const Admin = () => {
     };
 
     const addProject = () => {
-        if (!newProject.title) return;
+        if (!newProject.title) {
+            Swal.fire('Error', 'Project title is required!', 'error');
+            return;
+        }
         const projectToAdd = {
             title: newProject.title,
             description: newProject.description,
@@ -86,13 +92,50 @@ const Admin = () => {
             liveUrl: newProject.liveUrl || '#',
             githubUrl: newProject.githubUrl || '#'
         };
-        setProjects([projectToAdd, ...projects]);
+
+        if (editingIndex !== null) {
+            const updatedProjects = [...projects];
+            updatedProjects[editingIndex] = projectToAdd;
+            setProjects(updatedProjects);
+            setEditingIndex(null);
+            setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '' });
+            Swal.fire('Updated!', 'Project modified locally. Remember to click Sync!', 'success');
+        } else {
+            setProjects([projectToAdd, ...projects]);
+            setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '' });
+            Swal.fire('Added!', 'New project added locally. Remember to click Sync!', 'success');
+        }
     };
 
     const deleteProject = (index) => {
-        const newProjects = [...projects];
-        newProjects.splice(index, 1);
-        setProjects(newProjects);
+        Swal.fire({
+            title: 'Delete this project?',
+            text: "It will be removed locally. Click 'Sync & Deploy' to finalize.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const newProjects = [...projects];
+                newProjects.splice(index, 1);
+                setProjects(newProjects);
+                if (editingIndex === index) cancelEdit();
+                Swal.fire('Deleted!', 'Project removed locally. Remember to click Sync!', 'success');
+            }
+        });
+    };
+
+    const editProject = (index) => {
+        setEditingIndex(index);
+        setNewProject({ ...projects[index], imageFileBase64: null, imageFileName: '' });
+        if (formRef.current) formRef.current.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    const cancelEdit = () => {
+        setEditingIndex(null);
+        setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '' });
     };
 
     const saveChangesToGitHub = async () => {
@@ -170,8 +213,8 @@ const Admin = () => {
             <div className="max-w-5xl mx-auto">
                 <div className="flex justify-between items-center mb-8 bg-gray-800 p-4 rounded">
                     <h1 className="text-2xl font-bold">Portfolio Dashboard</h1>
-                    <button onClick={handleLogout} className="flex items-center gap-2 bg-red-600 px-4 py-2 rounded hover:bg-red-500">
-                        <FaSignOutAlt /> Disconnect
+                    <button onClick={handleLogout} className="flex items-center gap-2 bg-red-600 px-4 py-2 rounded hover:bg-red-500 transition-colors">
+                        <FaSignOutAlt /> Sign Out
                     </button>
                 </div>
 
@@ -181,20 +224,32 @@ const Admin = () => {
                     </div>
                 )}
 
-                {/* Add Project Section */}
-                <div className="bg-gray-800 p-6 rounded mb-8 shadow-lg">
-                    <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 border-b border-gray-700 pb-2"><FaPlus /> Add New Project</h2>
+                {/* Add/Edit Project Section */}
+                <div ref={formRef} className={`p-6 rounded mb-8 shadow-lg transition-all duration-300 border-2 ${editingIndex !== null ? 'bg-blue-900/40 border-blue-500/50' : 'bg-gray-800 border-transparent'}`}>
+                    <h2 className="text-xl font-semibold mb-4 flex items-center justify-between border-b border-gray-700 pb-2">
+                        <div className="flex items-center gap-2">
+                            {editingIndex !== null ? <FaEdit className="text-blue-400" /> : <FaPlus className="text-green-500" />}
+                            {editingIndex !== null ? <span className="text-blue-200">Edit Project</span> : 'Add New Project'}
+                        </div>
+                        {editingIndex !== null && (
+                            <button onClick={cancelEdit} className="text-sm bg-gray-600 hover:bg-gray-500 px-4 py-1 rounded transition-colors text-white">Cancel Edit</button>
+                        )}
+                    </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" placeholder="Project Title" className="p-2 bg-gray-700 rounded" value={newProject.title} onChange={e => setNewProject({ ...newProject, title: e.target.value })} />
-                        <input type="text" placeholder="Live Demo URL (optional)" className="p-2 bg-gray-700 rounded" value={newProject.liveUrl} onChange={e => setNewProject({ ...newProject, liveUrl: e.target.value })} />
-                        <input type="text" placeholder="GitHub Repo URL (optional)" className="p-2 bg-gray-700 rounded" value={newProject.githubUrl} onChange={e => setNewProject({ ...newProject, githubUrl: e.target.value })} />
+                        <input type="text" placeholder="Project Title" className="p-2 bg-gray-700 rounded outline-none focus:ring-2 focus:ring-blue-500" value={newProject.title} onChange={e => setNewProject({ ...newProject, title: e.target.value })} />
+                        <input type="text" placeholder="Live Demo URL (optional)" className="p-2 bg-gray-700 rounded outline-none focus:ring-2 focus:ring-blue-500" value={newProject.liveUrl} onChange={e => setNewProject({ ...newProject, liveUrl: e.target.value })} />
+                        <input type="text" placeholder="GitHub Repo URL (optional)" className="p-2 bg-gray-700 rounded outline-none focus:ring-2 focus:ring-blue-500" value={newProject.githubUrl} onChange={e => setNewProject({ ...newProject, githubUrl: e.target.value })} />
                         <div className="flex flex-col">
-                            <label className="text-sm text-gray-400 mb-1">Upload Project Image</label>
+                            <label className="text-sm text-gray-400 mb-1">
+                                {editingIndex !== null ? "Replace Image (Optional)" : "Upload Project Image"}
+                            </label>
                             <input type="file" accept="image/*" onChange={handleFileChange} className="p-1" />
                         </div>
-                        <textarea placeholder="Project Description" className="p-2 bg-gray-700 rounded md:col-span-2 h-24" value={newProject.description} onChange={e => setNewProject({ ...newProject, description: e.target.value })}></textarea>
+                        <textarea placeholder="Project Description" className="p-2 bg-gray-700 rounded outline-none focus:ring-2 focus:ring-blue-500 md:col-span-2 h-24" value={newProject.description} onChange={e => setNewProject({ ...newProject, description: e.target.value })}></textarea>
                     </div>
-                    <button onClick={addProject} className="mt-4 bg-green-600 hover:bg-green-500 px-6 py-2 rounded font-bold">Stage Local Addition</button>
+                    <button onClick={addProject} className={`mt-6 px-8 py-3 rounded font-bold transition-colors w-full md:w-auto shadow-lg text-white ${editingIndex !== null ? 'bg-blue-600 hover:bg-blue-500' : 'bg-green-600 hover:bg-green-500'}`}>
+                        {editingIndex !== null ? '✓ Update Local Project' : '+ Stage Local Addition'}
+                    </button>
                 </div>
 
                 {/* Projects List */}
@@ -211,15 +266,34 @@ const Admin = () => {
                     ) : (
                         <div className="grid grid-cols-1 gap-4">
                             {projects.map((proj, idx) => (
-                                <div key={idx} className="flex items-center bg-gray-700 p-4 rounded gap-4">
-                                    {proj.imageUrl && <img src={proj.imageUrl.startsWith('/') ? proj.imageUrl.substring(1) : proj.imageUrl} alt="preview" className="w-24 h-16 object-cover rounded" />}
-                                    <div className="flex-1">
-                                        <h3 className="font-bold">{proj.title}</h3>
-                                        <p className="text-sm text-gray-400 truncate">{proj.description}</p>
+                                <div key={idx} className="flex items-center bg-gray-700 p-4 rounded gap-4 overflow-hidden shadow">
+                                    {proj.imageUrl && (
+                                        <img
+                                            src={proj.imageUrl.startsWith('/') ? proj.imageUrl.substring(1) : proj.imageUrl}
+                                            alt="preview"
+                                            className="w-20 h-14 object-cover rounded flex-shrink-0 bg-gray-600"
+                                        />
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="font-bold text-white truncate">{proj.title}</h3>
+                                        <p className="text-sm text-gray-400 line-clamp-1">{proj.description}</p>
                                     </div>
-                                    <button onClick={() => deleteProject(idx)} className="bg-red-600 p-3 rounded text-white hover:bg-red-500" title="Delete Project">
-                                        <FaTrash />
-                                    </button>
+                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                        <button
+                                            onClick={() => editProject(idx)}
+                                            className="bg-blue-600/20 hover:bg-blue-600 p-3 rounded text-blue-500 hover:text-white transition-all"
+                                            title="Edit Project"
+                                        >
+                                            <FaEdit />
+                                        </button>
+                                        <button
+                                            onClick={() => deleteProject(idx)}
+                                            className="bg-red-600/20 hover:bg-red-600 p-3 rounded text-red-500 hover:text-white transition-all"
+                                            title="Delete Project"
+                                        >
+                                            <FaTrash />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                             {projects.length === 0 && <p className="text-gray-400">No projects found. Add one above.</p>}
