@@ -84,7 +84,7 @@ const Admin = () => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 const base64String = reader.result.replace('data:', '').replace(/^.+,/, '');
-                setNewProject({ ...newProject, imageFileBase64: base64String, imageFileName: safeFileName, imageUrl: `/projects/${safeFileName}` });
+                setNewProject({ ...newProject, imageFileBase64: base64String, imageFileName: safeFileName, imageUrl: `projects/${safeFileName}` });
             };
             reader.readAsDataURL(file);
         }
@@ -163,10 +163,10 @@ const Admin = () => {
                     setMessage(`Uploading image: ${proj._pendingImageName}...`);
                     let imageSha = null;
                     try {
-                        const res = await octokit.rest.repos.getContent({ 
-                            owner, 
-                            repo: _repo, 
-                            path: `public/projects/${proj._pendingImageName}` 
+                        const res = await octokit.rest.repos.getContent({
+                            owner,
+                            repo: _repo,
+                            path: `public/projects/${proj._pendingImageName}`
                         });
                         imageSha = res.data.sha;
                     } catch (e) { /* New file */ }
@@ -185,7 +185,7 @@ const Admin = () => {
             // 2. Prepare clean JSON (strip out the heavy base64 strings)
             setMessage('Saving projects.json...');
             const cleanProjects = projects.map(({ _pendingImageBase64, _pendingImageName, ...rest }) => rest);
-            
+
             const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(cleanProjects, null, 2))));
             const { data } = await octokit.rest.repos.createOrUpdateFileContents({
                 owner,
