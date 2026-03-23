@@ -1,73 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaGithub, FaExternalLinkAlt } from "react-icons/fa";
-
-import adatechImg from "../assets/adatech.png";
-import nextgenImg from "../assets/nextgen.png";
-import skyglowImg from "../assets/skyglow.png";
-import logitransportImg from "../assets/logitransport.png";
-import retromanagerImg from "../assets/retromanager.png";
-import feedbackhub360Img from "../assets/feedbackhub360.png";
-import salesinventoryImg from "../assets/salesinventory.png";
-
-const projects = [
-  {
-    title: "Ada Technical Institute",
-    description:
-      "A corporate learning and assessment platform for a technical institute, focusing on user experience and performance.",
-    imageUrl: adatechImg,
-    liveUrl: "https://adatech.infy.uk/?i=1",
-    githubUrl: "#",
-  },
-  {
-    title: "Nextgen CFO",
-    description:
-      "A modern financial dashboard for CFOs, built with React and a modern UI library to provide key insights.",
-    imageUrl: nextgenImg,
-    liveUrl: "https://nextgencfo.netlify.app/",
-    githubUrl: "#",
-  },
-  {
-    title: "SkyGlow Construction",
-    description:
-      "A professional website for a construction company, showcasing their portfolio and services.",
-    imageUrl: skyglowImg,
-    liveUrl: "#",
-    githubUrl: "#",
-  },
-  {
-    title: "Logi Transport Hub",
-    description:
-      "A logistics and transportation management system for tracking shipments and managing fleets.",
-    imageUrl: logitransportImg,
-    liveUrl: "#",
-    githubUrl: "#",
-  },
-  {
-    title: "Feedback Hub 360",
-    description:
-      "A comprehensive feedback management system built with React, FastAPI, and PostgreSQL with Prisma ORM for organizational feedback collection and analysis.",
-    imageUrl: feedbackhub360Img,
-    liveUrl: "#",
-    githubUrl: "https://github.com/jake-dev-official/Feedback-Hub-360",
-  },
-  {
-    title: "Sales & Inventory Management",
-    description:
-      "An offline-capable inventory system built with Python and Tkinter. Features product management, sales processing with real-time stock validation, PDF invoice generation, and debt tracking.",
-    imageUrl: salesinventoryImg,
-    liveUrl: "#",
-    githubUrl: "https://github.com/jake-dev-official/sales-inventory",
-  },
-  {
-    title: "JAKE Retro Download Manager",
-    description:
-      "A desktop application built with Python for managing and accelerating file downloads with a retro UI.",
-    imageUrl: retromanagerImg,
-    liveUrl: "#",
-    githubUrl: "#",
-  },
-];
 
 const containerVariants = {
   hidden: {},
@@ -84,6 +17,15 @@ const cardVariants = {
 };
 
 const Projects = () => {
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    fetch('/data/projects.json')
+      .then(res => res.json())
+      .then(data => setProjects(data))
+      .catch(err => console.error("Error loading projects: ", err));
+  }, []);
+
   return (
     <section id="projects" className="py-20 relative overflow-hidden">
       <div className="container mx-auto text-center relative z-10">
