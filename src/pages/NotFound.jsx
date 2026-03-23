@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import logo from '../assets/logo.png';
 
 const NotFound = () => {
     return (
@@ -21,7 +22,7 @@ const NotFound = () => {
                     className="group flex flex-col items-center justify-center transition-transform hover:scale-105"
                 >
                     <img
-                        src="logo.png"
+                        src={logo}
                         alt="JAKE"
                         className="h-24 mb-6 opacity-90 group-hover:opacity-100 drop-shadow-lg"
                         onError={(e) => e.target.style.display = 'none'}
