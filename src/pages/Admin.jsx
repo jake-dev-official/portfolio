@@ -67,10 +67,11 @@ const Admin = () => {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
             const reader = new FileReader();
             reader.onloadend = () => {
                 const base64String = reader.result.replace('data:', '').replace(/^.+,/, '');
-                setNewProject({ ...newProject, imageFileBase64: base64String, imageFileName: file.name, imageUrl: `/projects/${file.name}` });
+                setNewProject({ ...newProject, imageFileBase64: base64String, imageFileName: safeFileName, imageUrl: `/projects/${safeFileName}` });
             };
             reader.readAsDataURL(file);
         }
@@ -211,7 +212,7 @@ const Admin = () => {
                         <div className="grid grid-cols-1 gap-4">
                             {projects.map((proj, idx) => (
                                 <div key={idx} className="flex items-center bg-gray-700 p-4 rounded gap-4">
-                                    {proj.imageUrl && <img src={proj.imageUrl} alt="preview" className="w-24 h-16 object-cover rounded" />}
+                                    {proj.imageUrl && <img src={`${import.meta.env.BASE_URL}${proj.imageUrl.replace(/^\//, '')}`} alt="preview" className="w-24 h-16 object-cover rounded" />}
                                     <div className="flex-1">
                                         <h3 className="font-bold">{proj.title}</h3>
                                         <p className="text-sm text-gray-400 truncate">{proj.description}</p>
