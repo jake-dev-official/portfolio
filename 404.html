@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Page Not Found - Redirecting</title>
+    <script type="text/javascript">
+      // GitHub Pages / Infinity Free SPA Redirect Script
+      // This maps server-level 404 errors back to the React HashRouter
+      
+      var pathSegment = window.location.pathname;
+      
+      // Determine if we are hosted inside a GitHub Pages /portfolio/ folder
+      var repoPos = pathSegment.indexOf('/portfolio');
+      var base = repoPos !== -1 ? pathSegment.substring(0, repoPos + 10) : '';
+      
+      // Keep query parameters if any exist
+      var query = window.location.search;
+      
+      // Redirect to the React HashRouter's NotFound component
+      window.location.replace(base + "/#/404" + query);
+    </script>
+  </head>
+  <body style="background-color: #111827; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif;">
+    <p>Redirecting to Portfolio...</p>
+  </body>
+</html>

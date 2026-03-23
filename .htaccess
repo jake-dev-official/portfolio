@@ -1,0 +1,2 @@
+# Route all 404 Server Errors to the SPA Redirect Script
+ErrorDocument 404 /404.html
