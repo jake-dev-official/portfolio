@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaGithub, FaLinkedin } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -16,6 +17,7 @@ const Footer = () => {
           </a>
         </div>
         <p>&copy; {currentYear} JAKE. All Rights Reserved.</p>
+        <Link to="/admin" className="text-xs text-gray-600 mt-2 block hover:underline">Admin Login</Link>
       </div>
     </footer>
   );
