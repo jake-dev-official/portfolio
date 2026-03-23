@@ -26,7 +26,8 @@ const Admin = () => {
 
     // Form State
     const [newProject, setNewProject] = useState({
-        title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: ''
+        title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '',
+        imageFileBase64: null, imageFileName: '', displayUrl: ''
     });
 
     const getOctokit = () => new Octokit({ auth: token });
@@ -84,7 +85,13 @@ const Admin = () => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 const base64String = reader.result.replace('data:', '').replace(/^.+,/, '');
-                setNewProject({ ...newProject, imageFileBase64: base64String, imageFileName: safeFileName, imageUrl: `projects/${safeFileName}` });
+                setNewProject({
+                    ...newProject,
+                    imageFileBase64: base64String,
+                    imageFileName: safeFileName,
+                    imageUrl: `projects/${safeFileName}`,
+                    displayUrl: reader.result // This is for immediate dashboard preview
+                });
             };
             reader.readAsDataURL(file);
         }
@@ -101,9 +108,9 @@ const Admin = () => {
             imageUrl: newProject.imageUrl,
             liveUrl: newProject.liveUrl || '#',
             githubUrl: newProject.githubUrl || '#',
-            // Preserve upload data for the Sync step
             _pendingImageBase64: newProject.imageFileBase64,
-            _pendingImageName: newProject.imageFileName
+            _pendingImageName: newProject.imageFileName,
+            _preview: newProject.displayUrl // Stays in state for dashboard preview
         };
 
         if (editingIndex !== null) {
@@ -111,11 +118,11 @@ const Admin = () => {
             updatedProjects[editingIndex] = projectToAdd;
             setProjects(updatedProjects);
             setEditingIndex(null);
-            setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '' });
+            setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '', displayUrl: '' });
             DarkSwal.fire('Updated!', 'Project modified locally. Remember to click Sync!', 'success');
         } else {
             setProjects([projectToAdd, ...projects]);
-            setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '' });
+            setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '', displayUrl: '' });
             DarkSwal.fire('Added!', 'New project added locally. Remember to click Sync!', 'success');
         }
     };
@@ -141,13 +148,19 @@ const Admin = () => {
 
     const editProject = (index) => {
         setEditingIndex(index);
-        setNewProject({ ...projects[index], imageFileBase64: null, imageFileName: '' });
+        const proj = projects[index];
+        setNewProject({
+            ...proj,
+            imageFileBase64: null,
+            imageFileName: '',
+            displayUrl: proj._preview || (proj.imageUrl.startsWith('http') ? proj.imageUrl : proj.imageUrl)
+        });
         if (formRef.current) formRef.current.scrollIntoView({ behavior: 'smooth' });
     };
 
     const cancelEdit = () => {
         setEditingIndex(null);
-        setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '' });
+        setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '', displayUrl: '' });
     };
 
     const saveChangesToGitHub = async () => {
@@ -184,7 +197,7 @@ const Admin = () => {
 
             // 2. Prepare clean JSON (strip out the heavy base64 strings)
             setMessage('Saving projects.json...');
-            const cleanProjects = projects.map(({ _pendingImageBase64, _pendingImageName, ...rest }) => rest);
+            const cleanProjects = projects.map(({ _pendingImageBase64, _pendingImageName, _preview, ...rest }) => rest);
 
             const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(cleanProjects, null, 2))));
             const { data } = await octokit.rest.repos.createOrUpdateFileContents({
@@ -289,9 +302,9 @@ const Admin = () => {
                         <div className="grid grid-cols-1 gap-4">
                             {projects.map((proj, idx) => (
                                 <div key={idx} className="flex items-center bg-gray-700 p-4 rounded gap-4 overflow-hidden shadow">
-                                    {proj.imageUrl && (
+                                    {(proj._preview || proj.imageUrl) && (
                                         <img
-                                            src={proj.imageUrl.startsWith('/') ? proj.imageUrl.substring(1) : proj.imageUrl}
+                                            src={proj._preview || (proj.imageUrl.startsWith('http') ? proj.imageUrl : proj.imageUrl.startsWith('/') ? proj.imageUrl.substring(1) : proj.imageUrl)}
                                             alt="preview"
                                             className="w-20 h-14 object-cover rounded flex-shrink-0 bg-gray-600"
                                         />
