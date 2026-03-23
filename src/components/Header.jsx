@@ -17,7 +17,7 @@ const Header = () => {
       className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-4 transition-all duration-300"
       animate={{
         backgroundColor: isScrolled ? 'rgba(17, 24, 39, 0.8)' : 'rgba(17, 24, 39, 0)',
-        backdropFilter: isScrolled ? 'blur(10px)' : 'none',
+        backdropFilter: isScrolled ? 'blur(10px)' : 'blur(0px)',
       }}
     >
       <div className="text-2xl font-bold">
