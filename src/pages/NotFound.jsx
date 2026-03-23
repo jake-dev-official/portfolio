@@ -18,9 +18,17 @@ const NotFound = () => {
 
                 <Link
                     to="/"
-                    className="bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-lg font-bold transition-all transform hover:scale-105 inline-block shadow-lg border border-blue-400/20"
+                    className="group flex flex-col items-center justify-center transition-transform hover:scale-105"
                 >
-                    Return to Portfolio
+                    <img
+                        src="logo.png"
+                        alt="JAKE"
+                        className="h-24 mb-6 opacity-90 group-hover:opacity-100 drop-shadow-lg"
+                        onError={(e) => e.target.style.display = 'none'}
+                    />
+                    <span className="bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-lg font-bold shadow-lg border border-blue-400/20">
+                        Return to Portfolio
+                    </span>
                 </Link>
             </motion.div>
 
