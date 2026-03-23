@@ -1,5 +1,12 @@
 [
   {
+    "title": "ad",
+    "description": "ads",
+    "imageUrl": "/projects/Screenshot_2026-03-23_203306.png",
+    "liveUrl": "#",
+    "githubUrl": "#"
+  },
+  {
     "title": "Gemini Logo Animation",
     "description": "A premium web-based recreation of the Gemini generative identity. This project showcases fluid motion design, advanced SVG/CSS filtering, and adaptive performance rendering.",
     "imageUrl": "/projects/gemini.png",
