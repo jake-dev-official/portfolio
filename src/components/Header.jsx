@@ -30,8 +30,8 @@ const Header = () => {
           />
         </Link>
       </div>
-      <nav>
-        <ul className="flex space-x-6">
+      <nav className="flex h-full items-center">
+        <ul className="flex items-center space-x-8 text-lg font-medium">
           <li className="cursor-pointer hover:text-primary transition-colors">
             <Link to="about" smooth={true} duration={500} offset={-70}>
               About
