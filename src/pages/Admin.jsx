@@ -165,60 +165,72 @@ const Admin = () => {
 
     const saveChangesToGitHub = async () => {
         setLoading(true);
-        setMessage('Starting sync process...');
-        let uploadedCount = 0;
-        let errorCount = 0;
+        setMessage('Initializing Sync...');
+        let uploadedImages = [];
+        let failedImages = [];
 
         try {
             const octokit = getOctokit();
             const [owner, _repo] = repo.split('/');
 
-            // 1. Upload Images Sequentially
+            // 1. Process all projects and upload images if needed
             for (const proj of projects) {
                 if (proj._pendingImageBase64 && proj._pendingImageName) {
-                    setMessage(`Uploading: ${proj._pendingImageName}...`);
+                    setMessage(`Uploading ${proj._pendingImageName}...`);
                     try {
                         let imageSha = null;
                         try {
-                            // Check if file already exists to get SHA for update
                             const res = await octokit.rest.repos.getContent({
                                 owner,
                                 repo: _repo,
                                 path: `public/projects/${proj._pendingImageName}`
                             });
                             imageSha = res.data.sha;
-                        } catch (e) { /* New file */ }
+                        } catch (e) {
+                            // 404 is expected for new files, anything else is a real error
+                            if (e.status !== 404) throw e;
+                        }
 
-                        await octokit.rest.repos.createOrUpdateFileContents({
+                        const uploadRes = await octokit.rest.repos.createOrUpdateFileContents({
                             owner,
                             repo: _repo,
                             path: `public/projects/${proj._pendingImageName}`,
-                            message: `CMS: Upload image for ${proj.title}`,
+                            message: `CMS: Add image for project "${proj.title}"`,
                             content: proj._pendingImageBase64,
                             sha: imageSha || undefined
                         });
-                        uploadedCount++;
+
+                        if (uploadRes.status === 200 || uploadRes.status === 201) {
+                            uploadedImages.push(proj._pendingImageName);
+                        } else {
+                            throw new Error(`Unexpected status: ${uploadRes.status}`);
+                        }
                     } catch (uploadErr) {
-                        console.error('Image upload failed:', uploadErr);
-                        errorCount++;
+                        console.error(`Upload failed for ${proj._pendingImageName}:`, uploadErr);
+                        failedImages.push(`${proj._pendingImageName} (${uploadErr.message})`);
                     }
                 }
             }
 
-            if (errorCount > 0) {
+            if (failedImages.length > 0) {
+                const failMsg = failedImages.join('\n');
                 const proceed = await DarkSwal.fire({
-                    title: 'Sync Partial Failure',
-                    text: `${errorCount} image(s) failed to upload. Save text anyway?`,
+                    title: 'Partial Upload Failure',
+                    html: `<p>The following images failed to upload:</p><pre class="text-xs text-red-400 mt-2 text-left">${failMsg}</pre><p class="mt-2">Do you want to save the project text anyway?</p>`,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes, save text',
-                    cancelButtonText: 'No, abort'
+                    confirmButtonText: 'Save Text Only',
+                    cancelButtonText: 'Abort Sync'
                 });
-                if (!proceed.isConfirmed) throw new Error('Sync aborted by user');
+                if (!proceed.isConfirmed) {
+                    setMessage('Sync Aborted');
+                    setLoading(false);
+                    return;
+                }
             }
 
-            // 2. Prepare and Save JSON
-            setMessage(`Saving catalog (Uploaded ${uploadedCount} images)...`);
+            // 2. Update projects.json
+            setMessage('Saving projects.json...');
             const cleanProjects = projects.map(({ _pendingImageBase64, _pendingImageName, _preview, ...rest }) => rest);
             const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(cleanProjects, null, 2))));
 
@@ -226,7 +238,7 @@ const Admin = () => {
                 owner,
                 repo: _repo,
                 path: 'public/data/projects.json',
-                message: 'CMS: Update projects.json catalog',
+                message: 'CMS: Update projects catalog',
                 content: contentBase64,
                 sha: fileSha
             });
@@ -236,15 +248,15 @@ const Admin = () => {
             setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '', displayUrl: '' });
 
             DarkSwal.fire({
-                title: 'Sync Complete!',
-                text: `Success! ${uploadedCount} images uploaded and catalog updated. Build will finish in ~2mins.`,
+                title: '🎉 Sync Succesful!',
+                html: `<p>Catalog updated successfully.</p>${uploadedImages.length > 0 ? `<p class="text-sm text-green-400 mt-2">Images Uploaded: ${uploadedImages.join(', ')}</p>` : ''}`,
                 icon: 'success'
             });
             setMessage('');
         } catch (err) {
-            console.error('Save failed:', err);
-            DarkSwal.fire('Sync Error', err.message, 'error');
-            setMessage('Sync failed. Please try again.');
+            console.error('Final sync failed:', err);
+            DarkSwal.fire('Critical Sync Error', err.message, 'error');
+            setMessage('Sync failed. Check console for details.');
         } finally {
             setLoading(false);
         }
