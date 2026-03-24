@@ -2,63 +2,63 @@
   {
     "title": "ad",
     "description": "ads",
-    "imageUrl": "projects/Screenshot_2026-03-23_203306.png",
+    "imageUrl": "projects/Screenshot_2026-03-23_203306.webp",
     "liveUrl": "#",
     "githubUrl": "#"
   },
   {
     "title": "Gemini Logo Animation",
     "description": "A premium web-based recreation of the Gemini generative identity. This project showcases fluid motion design, advanced SVG/CSS filtering, and adaptive performance rendering.",
-    "imageUrl": "projects/Screenshot_2026-03-23_202259.png",
+    "imageUrl": "projects/Screenshot_2026-03-23_202259.webp",
     "liveUrl": "https://jake-dev-official.github.io/gemini-logo-animation/",
     "githubUrl": "https://github.com/jake-dev-official/gemini-logo-animation"
   },
   {
     "title": "Ada Technical Institute",
     "description": "A corporate learning and assessment platform for a technical institute, focusing on user experience and performance.",
-    "imageUrl": "/projects/adatech.png",
+    "imageUrl": "projects/adatech.webp",
     "liveUrl": "https://adatech.infy.uk/?i=1",
     "githubUrl": "#"
   },
   {
     "title": "Nextgen CFO",
     "description": "A modern CFO website, built with React and a modern UI library to provide key insights.",
-    "imageUrl": "/projects/nextgen.png",
+    "imageUrl": "projects/nextgen.webp",
     "liveUrl": "https://nextgencfo.netlify.app/",
     "githubUrl": "#"
   },
   {
     "title": "SkyGlow Construction",
     "description": "A professional website for a construction company, showcasing their portfolio and services.",
-    "imageUrl": "/projects/skyglow.png",
+    "imageUrl": "projects/skyglow.webp",
     "liveUrl": "#",
     "githubUrl": "#"
   },
   {
     "title": "Logi Transport Hub",
     "description": "A logistics and transportation management system for tracking shipments and managing fleets.",
-    "imageUrl": "/projects/logitransport.png",
+    "imageUrl": "projects/logitransport.webp",
     "liveUrl": "#",
     "githubUrl": "#"
   },
   {
     "title": "Feedback Hub 360",
     "description": "A comprehensive feedback management system built with React, FastAPI, and PostgreSQL with Prisma ORM for organizational feedback collection and analysis.",
-    "imageUrl": "/projects/feedbackhub360.png",
+    "imageUrl": "projects/feedbackhub360.webp",
     "liveUrl": "#",
     "githubUrl": "https://github.com/jake-dev-official/Feedback-Hub-360"
   },
   {
     "title": "Sales & Inventory Management",
     "description": "An offline-capable inventory system built with Python and Tkinter. Features product management, sales processing with real-time stock validation, PDF invoice generation, and debt tracking.",
-    "imageUrl": "/projects/salesinventory.png",
+    "imageUrl": "projects/salesinventory.webp",
     "liveUrl": "#",
     "githubUrl": "https://github.com/jake-dev-official/sales-inventory"
   },
   {
     "title": "JAKE Retro Download Manager",
     "description": "A desktop application built with Python for managing and accelerating file downloads with a retro UI.",
-    "imageUrl": "/projects/retromanager.png",
+    "imageUrl": "projects/retromanager.webp",
     "liveUrl": "#",
     "githubUrl": "#"
   }
