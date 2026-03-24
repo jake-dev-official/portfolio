@@ -15,23 +15,23 @@ const Header = () => {
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 py-1 transition-all duration-300"
+      className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-4 md:px-8 py-1 transition-all duration-300"
       animate={{
         backgroundColor: isScrolled ? 'rgba(17, 24, 39, 0.8)' : 'rgba(17, 24, 39, 0)',
         backdropFilter: isScrolled ? 'blur(10px)' : 'blur(0px)',
       }}
     >
-      <div className="flex items-center">
+      <div className="flex items-center flex-shrink-0">
         <Link to="hero" smooth={true} duration={500} className="cursor-pointer">
           <img
             src={logo}
             alt="JAKE"
-            className="h-24 w-auto hover:scale-105 transition-transform duration-300"
+            className="h-16 md:h-24 w-auto hover:scale-105 transition-transform duration-300"
           />
         </Link>
       </div>
-      <nav className="flex h-full items-center mt-1.5">
-        <ul className="flex items-center space-x-8 text-lg font-medium">
+      <nav className="flex h-full items-center mt-1.5 ml-4">
+        <ul className="flex items-center space-x-4 md:space-x-8 text-sm md:text-lg font-medium whitespace-nowrap">
           <li className="cursor-pointer hover:text-primary transition-colors">
             <Link to="about" smooth={true} duration={500} offset={-70}>
               About
