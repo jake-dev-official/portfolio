@@ -1,8 +1,15 @@
 [
   {
+    "title": "ad",
+    "description": "ads",
+    "imageUrl": "projects/Screenshot_2026-03-23_203306.webp",
+    "liveUrl": "#",
+    "githubUrl": "#"
+  },
+  {
     "title": "Gemini Logo Animation",
     "description": "A premium web-based recreation of the Gemini generative identity. This project showcases fluid motion design, advanced SVG/CSS filtering, and adaptive performance rendering.",
-    "imageUrl": "projects/gemini.webp",
+    "imageUrl": "projects/Screenshot_2026-03-23_202259.webp",
     "liveUrl": "https://jake-dev-official.github.io/gemini-logo-animation/",
     "githubUrl": "https://github.com/jake-dev-official/gemini-logo-animation"
   },
