@@ -1,14 +1,14 @@
 [
   {
     "title": "Gemini Logo Animation",
-    "description": "A premium web-based recreation of the Gemini generative identity. This project showcases fluid motion design, advanced SVG/CSS filtering, and adaptive performance rendering.",
+    "description": "A web-based recreation of the Gemini generative identity. This project showcases fluid motion design, advanced SVG/CSS filtering, and adaptive performance rendering.",
     "imageUrl": "projects/gemini.webp",
     "liveUrl": "https://jake-dev-official.github.io/gemini-logo-animation/",
     "githubUrl": "https://github.com/jake-dev-official/gemini-logo-animation"
   },
   {
     "title": "Ada Technical Institute",
-    "description": "A corporate learning and assessment platform for a technical institute, focusing on user experience and performance.",
+    "description": "A responsive school platform built with HTML, CSS, and JavaScript to manage news updates and event galleries. It features a PHP and MySQL backend to handle departmental information, academic resources, and public staff directories for students and parents",
     "imageUrl": "projects/adatech.webp",
     "liveUrl": "https://adatech.infy.uk/?i=1",
     "githubUrl": "#"
@@ -43,7 +43,7 @@
   },
   {
     "title": "Sales & Inventory Management",
-    "description": "An offline-capable inventory system built with Python and Tkinter. Features product management, sales processing with real-time stock validation, PDF invoice generation, and debt tracking.",
+    "description": "A lightweight, offline desktop application designed for seamless small-scale stock management. Built with Python and Tkinter, it automates sales processing and PDF invoice generation while leveraging Excel for flexible data portability. Key features include real-time stock validation and a dedicated module for tracking customer debt.",
     "imageUrl": "projects/salesinventory.webp",
     "liveUrl": "#",
     "githubUrl": "https://github.com/jake-dev-official/sales-inventory"
