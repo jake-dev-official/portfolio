@@ -165,58 +165,86 @@ const Admin = () => {
 
     const saveChangesToGitHub = async () => {
         setLoading(true);
-        setMessage('Saving changes to GitHub...');
+        setMessage('Starting sync process...');
+        let uploadedCount = 0;
+        let errorCount = 0;
+
         try {
             const octokit = getOctokit();
             const [owner, _repo] = repo.split('/');
 
-            // 1. Scan for any projects with pending images and upload them
+            // 1. Upload Images Sequentially
             for (const proj of projects) {
                 if (proj._pendingImageBase64 && proj._pendingImageName) {
-                    setMessage(`Uploading image: ${proj._pendingImageName}...`);
-                    let imageSha = null;
+                    setMessage(`Uploading: ${proj._pendingImageName}...`);
                     try {
-                        const res = await octokit.rest.repos.getContent({
+                        let imageSha = null;
+                        try {
+                            // Check if file already exists to get SHA for update
+                            const res = await octokit.rest.repos.getContent({
+                                owner,
+                                repo: _repo,
+                                path: `public/projects/${proj._pendingImageName}`
+                            });
+                            imageSha = res.data.sha;
+                        } catch (e) { /* New file */ }
+
+                        await octokit.rest.repos.createOrUpdateFileContents({
                             owner,
                             repo: _repo,
-                            path: `public/projects/${proj._pendingImageName}`
+                            path: `public/projects/${proj._pendingImageName}`,
+                            message: `CMS: Upload image for ${proj.title}`,
+                            content: proj._pendingImageBase64,
+                            sha: imageSha || undefined
                         });
-                        imageSha = res.data.sha;
-                    } catch (e) { /* New file */ }
-
-                    await octokit.rest.repos.createOrUpdateFileContents({
-                        owner,
-                        repo: _repo,
-                        path: `public/projects/${proj._pendingImageName}`,
-                        message: `Upload image for ${proj.title}`,
-                        content: proj._pendingImageBase64,
-                        sha: imageSha || undefined
-                    });
+                        uploadedCount++;
+                    } catch (uploadErr) {
+                        console.error('Image upload failed:', uploadErr);
+                        errorCount++;
+                    }
                 }
             }
 
-            // 2. Prepare clean JSON (strip out the heavy base64 strings)
-            setMessage('Saving projects.json...');
-            const cleanProjects = projects.map(({ _pendingImageBase64, _pendingImageName, _preview, ...rest }) => rest);
+            if (errorCount > 0) {
+                const proceed = await DarkSwal.fire({
+                    title: 'Sync Partial Failure',
+                    text: `${errorCount} image(s) failed to upload. Save text anyway?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, save text',
+                    cancelButtonText: 'No, abort'
+                });
+                if (!proceed.isConfirmed) throw new Error('Sync aborted by user');
+            }
 
+            // 2. Prepare and Save JSON
+            setMessage(`Saving catalog (Uploaded ${uploadedCount} images)...`);
+            const cleanProjects = projects.map(({ _pendingImageBase64, _pendingImageName, _preview, ...rest }) => rest);
             const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(cleanProjects, null, 2))));
+
             const { data } = await octokit.rest.repos.createOrUpdateFileContents({
                 owner,
                 repo: _repo,
                 path: 'public/data/projects.json',
-                message: 'Update projects catalog via CMS',
+                message: 'CMS: Update projects.json catalog',
                 content: contentBase64,
                 sha: fileSha
             });
 
             setFileSha(data.content.sha);
-            // Update local state to remove the pending flags
             setProjects(cleanProjects);
-            setMessage('Successfully saved to GitHub! Deployment should start automatically.');
-            setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '' });
+            setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '', displayUrl: '' });
+
+            DarkSwal.fire({
+                title: 'Sync Complete!',
+                text: `Success! ${uploadedCount} images uploaded and catalog updated. Build will finish in ~2mins.`,
+                icon: 'success'
+            });
+            setMessage('');
         } catch (err) {
-            console.error(err);
-            setMessage('Failed to save changes: ' + err.message);
+            console.error('Save failed:', err);
+            DarkSwal.fire('Sync Error', err.message, 'error');
+            setMessage('Sync failed. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -310,7 +338,14 @@ const Admin = () => {
                                         />
                                     )}
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="font-bold text-white truncate">{proj.title}</h3>
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="font-bold text-white truncate">{proj.title}</h3>
+                                            {proj._pendingImageBase64 && (
+                                                <span className="text-[10px] bg-blue-600/30 text-blue-400 px-1.5 py-0.5 rounded border border-blue-600/50 flex flex-wrap shrink-0">
+                                                    Pending Sync
+                                                </span>
+                                            )}
+                                        </div>
                                         <p className="text-sm text-gray-400 line-clamp-1">{proj.description}</p>
                                     </div>
                                     <div className="flex items-center gap-2 flex-shrink-0">
