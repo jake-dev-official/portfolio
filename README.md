@@ -38,9 +38,11 @@ A responsive, high-performance professional portfolio built with React and Vite.
 ## 💻 Local Setup
 
 
-
-**Developed by JAKEDev.**
-
 1. **Clone the repository:**
    ```bash
    git clone [https://github.com/jake-dev-official/portfolio.git](https://github.com/jake-dev-official/portfolio.git)
+
+
+
+
+**Developed by JAKEDev.**
