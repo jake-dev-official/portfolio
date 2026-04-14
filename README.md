@@ -43,6 +43,4 @@ A responsive, high-performance professional portfolio built with React and Vite.
    git clone [https://github.com/jake-dev-official/portfolio.git](https://github.com/jake-dev-official/portfolio.git)
 
 
-
-
 **Developed by JAKEDev.**
