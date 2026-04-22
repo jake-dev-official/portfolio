@@ -1,27 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaHtml5, FaCss3Alt, FaReact, FaPhp, FaBootstrap, FaPython } from 'react-icons/fa';
-import { IoLogoJavascript } from 'react-icons/io5';
-import { SiTailwindcss, SiMui, SiMysql, SiMongodb, SiPostgresql, SiPrisma } from 'react-icons/si';
+import * as FaIcons from 'react-icons/fa';
+import * as IoIcons from 'react-icons/io5';
+import * as SiIcons from 'react-icons/si';
 
-const frontendSkills = [
-  { icon: <FaHtml5 />, name: 'HTML' },
-  { icon: <FaCss3Alt />, name: 'CSS' },
-  { icon: <IoLogoJavascript />, name: 'JavaScript' },
-  { icon: <FaReact />, name: 'React' },
-  { icon: <FaBootstrap />, name: 'Bootstrap' },
-  { icon: <SiMui />, name: 'Material-UI' },
-  { icon: <SiTailwindcss />, name: 'Tailwind CSS' },
-];
-
-const backendSkills = [
-  { icon: <FaPython />, name: 'Python' },
-  { icon: <FaPhp />, name: 'PHP' },
-  { icon: <SiMysql />, name: 'MySQL' },
-  { icon: <SiPostgresql />, name: 'PostgreSQL' },
-  { icon: <SiMongodb />, name: 'MongoDB' },
-  { icon: <SiPrisma />, name: 'Prisma' },
-];
+const getIcon = (iconName) => {
+  const IconComponent = FaIcons[iconName] || IoIcons[iconName] || SiIcons[iconName];
+  return IconComponent ? <IconComponent /> : null;
+};
 
 const skillCategoryVariants = {
   hidden: {},
@@ -38,6 +24,15 @@ const skillItemVariants = {
 };
 
 const About = () => {
+  const [skills, setSkills] = useState({ frontend: [], backend: [] });
+
+  useEffect(() => {
+    fetch('data/skills.json')
+      .then(res => res.json())
+      .then(data => setSkills(data))
+      .catch(err => console.error("Error loading skills: ", err));
+  }, []);
+
   return (
     <motion.section 
       id="about" 
@@ -68,9 +63,9 @@ const About = () => {
               whileInView="visible"
               viewport={{ once: true, amount: 0.2 }}
             >
-              {frontendSkills.map((skill, index) => (
-                <motion.div key={index} className="flex flex-col items-center gap-2 p-4 bg-gray-800 rounded-lg" variants={skillItemVariants}>
-                  <div className="text-5xl text-primary">{skill.icon}</div>
+              {skills.frontend.map((skill, index) => (
+                <motion.div key={index} className="flex flex-col items-center gap-2 p-4 bg-gray-800 rounded-lg w-32" variants={skillItemVariants}>
+                  <div className="text-5xl text-primary">{getIcon(skill.icon)}</div>
                   <span className="font-medium">{skill.name}</span>
                 </motion.div>
               ))}
@@ -85,9 +80,9 @@ const About = () => {
               whileInView="visible"
               viewport={{ once: true, amount: 0.2 }}
             >
-              {backendSkills.map((skill, index) => (
-                <motion.div key={index} className="flex flex-col items-center gap-2 p-4 bg-gray-800 rounded-lg" variants={skillItemVariants}>
-                  <div className="text-5xl text-secondary">{skill.icon}</div>
+              {skills.backend.map((skill, index) => (
+                <motion.div key={index} className="flex flex-col items-center gap-2 p-4 bg-gray-800 rounded-lg w-32" variants={skillItemVariants}>
+                  <div className="text-5xl text-secondary">{getIcon(skill.icon)}</div>
                   <span className="font-medium">{skill.name}</span>
                 </motion.div>
               ))}

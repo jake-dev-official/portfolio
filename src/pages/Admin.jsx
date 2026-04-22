@@ -18,7 +18,9 @@ const Admin = () => {
     const [repo, setRepo] = useState(localStorage.getItem('github_repo') || '');
     const [isAuthenticated, setIsAuthenticated] = useState(!!token && !!repo);
     const [projects, setProjects] = useState([]);
+    const [skills, setSkills] = useState({ frontend: [], backend: [] });
     const [fileSha, setFileSha] = useState('');
+    const [skillsSha, setSkillsSha] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [editingIndex, setEditingIndex] = useState(null);
@@ -27,14 +29,19 @@ const Admin = () => {
     // Form State
     const [newProject, setNewProject] = useState({
         title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '',
+        techStack: '', // comma separated in form
         imageFileBase64: null, imageFileName: '', displayUrl: ''
     });
+
+    const [newSkill, setNewSkill] = useState({ name: '', icon: '', category: 'frontend' });
+    const [editingSkillIndex, setEditingSkillIndex] = useState(null);
 
     const getOctokit = () => new Octokit({ auth: token });
 
     useEffect(() => {
         if (isAuthenticated) {
             loadProjects();
+            loadSkills();
         }
     }, [isAuthenticated]);
 
@@ -78,6 +85,23 @@ const Admin = () => {
         }
     };
 
+    const loadSkills = async () => {
+        try {
+            const octokit = getOctokit();
+            const [owner, _repo] = repo.split('/');
+            const { data } = await octokit.rest.repos.getContent({
+                owner,
+                repo: _repo,
+                path: 'public/data/skills.json',
+            });
+            const content = decodeURIComponent(escape(atob(data.content)));
+            setSkills(JSON.parse(content));
+            setSkillsSha(data.sha);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -108,6 +132,9 @@ const Admin = () => {
             imageUrl: newProject.imageUrl,
             liveUrl: newProject.liveUrl || '#',
             githubUrl: newProject.githubUrl || '#',
+            techStack: typeof newProject.techStack === 'string'
+                ? newProject.techStack.split(',').map(s => s.trim()).filter(s => s !== '')
+                : newProject.techStack,
             _pendingImageBase64: newProject.imageFileBase64,
             _pendingImageName: newProject.imageFileName,
             _preview: newProject.displayUrl // Stays in state for dashboard preview
@@ -118,11 +145,11 @@ const Admin = () => {
             updatedProjects[editingIndex] = projectToAdd;
             setProjects(updatedProjects);
             setEditingIndex(null);
-            setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '', displayUrl: '' });
+            setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', techStack: '', imageFileBase64: null, imageFileName: '', displayUrl: '' });
             DarkSwal.fire('Updated!', 'Project modified locally. Remember to click Sync!', 'success');
         } else {
             setProjects([projectToAdd, ...projects]);
-            setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '', displayUrl: '' });
+            setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', techStack: '', imageFileBase64: null, imageFileName: '', displayUrl: '' });
             DarkSwal.fire('Added!', 'New project added locally. Remember to click Sync!', 'success');
         }
     };
@@ -151,6 +178,7 @@ const Admin = () => {
         const proj = projects[index];
         setNewProject({
             ...proj,
+            techStack: Array.isArray(proj.techStack) ? proj.techStack.join(', ') : '',
             imageFileBase64: null,
             imageFileName: '',
             displayUrl: proj._preview || (proj.imageUrl.startsWith('http') ? proj.imageUrl : proj.imageUrl)
@@ -160,7 +188,42 @@ const Admin = () => {
 
     const cancelEdit = () => {
         setEditingIndex(null);
-        setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '', displayUrl: '' });
+        setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', techStack: '', imageFileBase64: null, imageFileName: '', displayUrl: '' });
+    };
+
+    const addSkill = () => {
+        if (!newSkill.name || !newSkill.icon) {
+            DarkSwal.fire('Error', 'Name and Icon are required!', 'error');
+            return;
+        }
+        const updatedSkills = { ...skills };
+        if (editingSkillIndex !== null) {
+            const { category, index } = editingSkillIndex;
+            // If category changed, remove from old, add to new
+            if (category !== newSkill.category) {
+                updatedSkills[category].splice(index, 1);
+                updatedSkills[newSkill.category].push({ name: newSkill.name, icon: newSkill.icon });
+            } else {
+                updatedSkills[category][index] = { name: newSkill.name, icon: newSkill.icon };
+            }
+            setEditingSkillIndex(null);
+        } else {
+            updatedSkills[newSkill.category].push({ name: newSkill.name, icon: newSkill.icon });
+        }
+        setSkills(updatedSkills);
+        setNewSkill({ name: '', icon: '', category: 'frontend' });
+    };
+
+    const deleteSkill = (category, index) => {
+        const updatedSkills = { ...skills };
+        updatedSkills[category].splice(index, 1);
+        setSkills(updatedSkills);
+    };
+
+    const editSkill = (category, index) => {
+        const skill = skills[category][index];
+        setNewSkill({ ...skill, category });
+        setEditingSkillIndex({ category, index });
     };
 
     const saveChangesToGitHub = async () => {
@@ -245,11 +308,24 @@ const Admin = () => {
 
             setFileSha(data.content.sha);
             setProjects(cleanProjects);
-            setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', imageFileBase64: null, imageFileName: '', displayUrl: '' });
+            setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', techStack: '', imageFileBase64: null, imageFileName: '', displayUrl: '' });
+
+            // 3. Update skills.json
+            setMessage('Saving skills.json...');
+            const skillsContentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(skills, null, 2))));
+            const skillsRes = await octokit.rest.repos.createOrUpdateFileContents({
+                owner,
+                repo: _repo,
+                path: 'public/data/skills.json',
+                message: 'CMS: Update skills catalog',
+                content: skillsContentBase64,
+                sha: skillsSha
+            });
+            setSkillsSha(skillsRes.data.content.sha);
 
             DarkSwal.fire({
                 title: '🎉 Sync Succesful!',
-                html: `<p>Catalog updated successfully.</p>${uploadedImages.length > 0 ? `<p class="text-sm text-green-400 mt-2">Images Uploaded: ${uploadedImages.join(', ')}</p>` : ''}`,
+                html: `<p>Catalog and skills updated successfully.</p>${uploadedImages.length > 0 ? `<p class="text-sm text-green-400 mt-2">Images Uploaded: ${uploadedImages.join(', ')}</p>` : ''}`,
                 icon: 'success'
             });
             setMessage('');
@@ -314,6 +390,7 @@ const Admin = () => {
                         <input type="text" placeholder="Project Title" className="p-2 bg-gray-700 rounded outline-none focus:ring-2 focus:ring-blue-500" value={newProject.title} onChange={e => setNewProject({ ...newProject, title: e.target.value })} />
                         <input type="text" placeholder="Live Demo URL (optional)" className="p-2 bg-gray-700 rounded outline-none focus:ring-2 focus:ring-blue-500" value={newProject.liveUrl} onChange={e => setNewProject({ ...newProject, liveUrl: e.target.value })} />
                         <input type="text" placeholder="GitHub Repo URL (optional)" className="p-2 bg-gray-700 rounded outline-none focus:ring-2 focus:ring-blue-500" value={newProject.githubUrl} onChange={e => setNewProject({ ...newProject, githubUrl: e.target.value })} />
+                        <input type="text" placeholder="Tech Stack (comma separated: React, Tailwind, etc)" className="p-2 bg-gray-700 rounded outline-none focus:ring-2 focus:ring-blue-500" value={newProject.techStack} onChange={e => setNewProject({ ...newProject, techStack: e.target.value })} />
                         <div className="flex flex-col">
                             <label className="text-sm text-gray-400 mb-1">
                                 {editingIndex !== null ? "Replace Image (Optional)" : "Upload Project Image"}
@@ -325,6 +402,58 @@ const Admin = () => {
                     <button onClick={addProject} className={`mt-6 px-8 py-3 rounded font-bold transition-colors w-full md:w-auto shadow-lg text-white ${editingIndex !== null ? 'bg-blue-600 hover:bg-blue-500' : 'bg-green-600 hover:bg-green-500'}`}>
                         {editingIndex !== null ? '✓ Update Local Project' : '+ Stage Local Addition'}
                     </button>
+                </div>
+
+                {/* Skills Management Section */}
+                <div className={`p-6 rounded mb-8 shadow-lg transition-all duration-300 border-2 ${editingSkillIndex !== null ? 'bg-purple-900/40 border-purple-500/50' : 'bg-gray-800 border-transparent'}`}>
+                    <h2 className="text-xl font-semibold mb-4 flex items-center justify-between border-b border-gray-700 pb-2">
+                        <div className="flex items-center gap-2">
+                            {editingSkillIndex !== null ? <FaEdit className="text-purple-400" /> : <FaPlus className="text-green-500" />}
+                            {editingSkillIndex !== null ? <span className="text-purple-200">Edit Skill</span> : 'Add New Skill'}
+                        </div>
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input type="text" placeholder="Skill Name (e.g. React)" className="p-2 bg-gray-700 rounded outline-none focus:ring-2 focus:ring-purple-500" value={newSkill.name} onChange={e => setNewSkill({ ...newSkill, name: e.target.value })} />
+                        <input type="text" placeholder="Icon Name (e.g. FaReact)" className="p-2 bg-gray-700 rounded outline-none focus:ring-2 focus:ring-purple-500" value={newSkill.icon} onChange={e => setNewSkill({ ...newSkill, icon: e.target.value })} />
+                        <select className="p-2 bg-gray-700 rounded outline-none focus:ring-2 focus:ring-purple-500" value={newSkill.category} onChange={e => setNewSkill({ ...newSkill, category: e.target.value })}>
+                            <option value="frontend">Frontend</option>
+                            <option value="backend">Backend & Databases</option>
+                        </select>
+                    </div>
+                    <button onClick={addSkill} className={`mt-6 px-8 py-3 rounded font-bold transition-colors w-full md:w-auto shadow-lg text-white ${editingSkillIndex !== null ? 'bg-purple-600 hover:bg-purple-500' : 'bg-green-600 hover:bg-green-500'}`}>
+                        {editingSkillIndex !== null ? '✓ Update Local Skill' : '+ Stage Local Skill'}
+                    </button>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                        <div>
+                            <h3 className="font-bold mb-4 text-gray-400 uppercase tracking-wider text-sm">Frontend Skills</h3>
+                            <div className="space-y-2">
+                                {skills.frontend.map((s, idx) => (
+                                    <div key={idx} className="flex justify-between items-center bg-gray-700/50 p-2 rounded">
+                                        <span>{s.name} ({s.icon})</span>
+                                        <div className="flex gap-2">
+                                            <button onClick={() => editSkill('frontend', idx)} className="text-blue-400 hover:text-blue-300" aria-label={`Edit ${s.name} Skill`} title="Edit Skill"><FaEdit /></button>
+                                            <button onClick={() => deleteSkill('frontend', idx)} className="text-red-400 hover:text-red-300" aria-label={`Delete ${s.name} Skill`} title="Delete Skill"><FaTrash /></button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <h3 className="font-bold mb-4 text-gray-400 uppercase tracking-wider text-sm">Backend Skills</h3>
+                            <div className="space-y-2">
+                                {skills.backend.map((s, idx) => (
+                                    <div key={idx} className="flex justify-between items-center bg-gray-700/50 p-2 rounded">
+                                        <span>{s.name} ({s.icon})</span>
+                                        <div className="flex gap-2">
+                                            <button onClick={() => editSkill('backend', idx)} className="text-blue-400 hover:text-blue-300" aria-label={`Edit ${s.name} Skill`} title="Edit Skill"><FaEdit /></button>
+                                            <button onClick={() => deleteSkill('backend', idx)} className="text-red-400 hover:text-red-300" aria-label={`Delete ${s.name} Skill`} title="Delete Skill"><FaTrash /></button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Projects List */}
