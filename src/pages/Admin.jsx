@@ -21,6 +21,7 @@ const Admin = () => {
     const [skills, setSkills] = useState({ frontend: [], backend: [] });
     const [fileSha, setFileSha] = useState('');
     const [skillsSha, setSkillsSha] = useState('');
+    const [resumeSha, setResumeSha] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [editingIndex, setEditingIndex] = useState(null);
@@ -42,6 +43,7 @@ const Admin = () => {
         if (isAuthenticated) {
             loadProjects();
             loadSkills();
+            loadResumeInfo();
         }
     }, [isAuthenticated]);
 
@@ -99,6 +101,21 @@ const Admin = () => {
             setSkillsSha(data.sha);
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const loadResumeInfo = async () => {
+        try {
+            const octokit = getOctokit();
+            const [owner, _repo] = repo.split('/');
+            const { data } = await octokit.rest.repos.getContent({
+                owner,
+                repo: _repo,
+                path: 'public/Jerry_Anane_CV.pdf',
+            });
+            setResumeSha(data.sha);
+        } catch (error) {
+            if (error.status !== 404) console.error(error);
         }
     };
 
@@ -224,6 +241,42 @@ const Admin = () => {
         const skill = skills[category][index];
         setNewSkill({ ...skill, category });
         setEditingSkillIndex({ category, index });
+    };
+
+    const handleResumeUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setLoading(true);
+        setMessage('Uploading Resume...');
+        try {
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const base64String = reader.result.replace('data:', '').replace(/^.+,/, '');
+                const octokit = getOctokit();
+                const [owner, _repo] = repo.split('/');
+
+                const res = await octokit.rest.repos.createOrUpdateFileContents({
+                    owner,
+                    repo: _repo,
+                    path: 'public/Jerry_Anane_CV.pdf',
+                    message: 'CMS: Update Resume',
+                    content: base64String,
+                    sha: resumeSha || undefined
+                });
+
+                setResumeSha(res.data.content.sha);
+                DarkSwal.fire('Success', 'Resume updated successfully!', 'success');
+                setMessage('');
+                setLoading(false);
+            };
+            reader.readAsDataURL(file);
+        } catch (error) {
+            console.error(error);
+            DarkSwal.fire('Error', 'Failed to upload resume: ' + error.message, 'error');
+            setLoading(false);
+            setMessage('');
+        }
     };
 
     const saveChangesToGitHub = async () => {
@@ -402,6 +455,23 @@ const Admin = () => {
                     <button onClick={addProject} className={`mt-6 px-8 py-3 rounded font-bold transition-colors w-full md:w-auto shadow-lg text-white ${editingIndex !== null ? 'bg-blue-600 hover:bg-blue-500' : 'bg-green-600 hover:bg-green-500'}`}>
                         {editingIndex !== null ? '✓ Update Local Project' : '+ Stage Local Addition'}
                     </button>
+                </div>
+
+                {/* Resume Management Section */}
+                <div className="p-6 rounded mb-8 shadow-lg bg-gray-800 border-transparent border-2">
+                    <h2 className="text-xl font-semibold mb-4 border-b border-gray-700 pb-2 flex items-center gap-2">
+                        <FaSave className="text-blue-400" /> Manage Resume (CV)
+                    </h2>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm text-gray-400">Upload your CV (PDF format)</label>
+                        <input
+                            type="file"
+                            accept=".pdf"
+                            onChange={handleResumeUpload}
+                            className="p-1 text-sm bg-gray-700 rounded w-full md:w-auto"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">This will overwrite public/Jerry_Anane_CV.pdf on GitHub immediately.</p>
+                    </div>
                 </div>
 
                 {/* Skills Management Section */}
