@@ -36,6 +36,7 @@ const Admin = () => {
 
     const [newSkill, setNewSkill] = useState({ name: '', icon: '', category: 'frontend' });
     const [editingSkillIndex, setEditingSkillIndex] = useState(null);
+    const [pendingResume, setPendingResume] = useState(null);
 
     const getOctokit = () => new Octokit({ auth: token });
 
@@ -243,40 +244,17 @@ const Admin = () => {
         setEditingSkillIndex({ category, index });
     };
 
-    const handleResumeUpload = async (e) => {
+    const handleResumeUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        setLoading(true);
-        setMessage('Uploading Resume...');
-        try {
-            const reader = new FileReader();
-            reader.onloadend = async () => {
-                const base64String = reader.result.replace('data:', '').replace(/^.+,/, '');
-                const octokit = getOctokit();
-                const [owner, _repo] = repo.split('/');
-
-                const res = await octokit.rest.repos.createOrUpdateFileContents({
-                    owner,
-                    repo: _repo,
-                    path: 'public/Jerry_Anane_CV.pdf',
-                    message: 'CMS: Update Resume',
-                    content: base64String,
-                    sha: resumeSha || undefined
-                });
-
-                setResumeSha(res.data.content.sha);
-                DarkSwal.fire('Success', 'Resume updated successfully!', 'success');
-                setMessage('');
-                setLoading(false);
-            };
-            reader.readAsDataURL(file);
-        } catch (error) {
-            console.error(error);
-            DarkSwal.fire('Error', 'Failed to upload resume: ' + error.message, 'error');
-            setLoading(false);
-            setMessage('');
-        }
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64String = reader.result.replace('data:', '').replace(/^.+,/, '');
+            setPendingResume(base64String);
+            DarkSwal.fire('Staged!', 'Resume added to pending changes. Remember to click "Sync & Deploy"!', 'info');
+        };
+        reader.readAsDataURL(file);
     };
 
     const saveChangesToGitHub = async () => {
@@ -376,9 +354,24 @@ const Admin = () => {
             });
             setSkillsSha(skillsRes.data.content.sha);
 
+            // 4. Update Resume if pending
+            if (pendingResume) {
+                setMessage('Uploading Resume...');
+                const resumeRes = await octokit.rest.repos.createOrUpdateFileContents({
+                    owner,
+                    repo: _repo,
+                    path: 'public/Jerry_Anane_CV.pdf',
+                    message: 'CMS: Update Resume',
+                    content: pendingResume,
+                    sha: resumeSha || undefined
+                });
+                setResumeSha(resumeRes.data.content.sha);
+                setPendingResume(null);
+            }
+
             DarkSwal.fire({
                 title: '🎉 Sync Succesful!',
-                html: `<p>Catalog and skills updated successfully.</p>${uploadedImages.length > 0 ? `<p class="text-sm text-green-400 mt-2">Images Uploaded: ${uploadedImages.join(', ')}</p>` : ''}`,
+                html: `<p>Catalog, skills, and resume updated successfully.</p>${uploadedImages.length > 0 ? `<p class="text-sm text-green-400 mt-2">Images Uploaded: ${uploadedImages.join(', ')}</p>` : ''}`,
                 icon: 'success'
             });
             setMessage('');
@@ -463,14 +456,21 @@ const Admin = () => {
                         <FaSave className="text-blue-400" /> Manage Resume (CV)
                     </h2>
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm text-gray-400">Upload your CV (PDF format)</label>
+                        <div className="flex items-center gap-4">
+                            <label className="text-sm text-gray-400">Upload your CV (PDF format)</label>
+                            {pendingResume && (
+                                <span className="text-[10px] bg-blue-600/30 text-blue-400 px-1.5 py-0.5 rounded border border-blue-600/50">
+                                    Pending Sync
+                                </span>
+                            )}
+                        </div>
                         <input
                             type="file"
                             accept=".pdf"
                             onChange={handleResumeUpload}
                             className="p-1 text-sm bg-gray-700 rounded w-full md:w-auto"
                         />
-                        <p className="text-xs text-gray-500 mt-1">This will overwrite public/Jerry_Anane_CV.pdf on GitHub immediately.</p>
+                        <p className="text-xs text-gray-500 mt-1">Staged resume will be uploaded when you click "Sync & Deploy to GitHub".</p>
                     </div>
                 </div>
 
