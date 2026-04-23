@@ -38,8 +38,8 @@ const Hero = () => {
             variants={{ ...textVariants, transition: { ...textVariants.transition, delay: 0.6 } }}
           >
             <a
-              href="resume-placeholder.pdf"
-              download
+              href="Jerry_Anane_CV.pdf"
+              download="Jerry_Anane_CV.pdf"
               className="inline-block bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-lg transition-colors shadow-lg"
             >
               Download CV
