@@ -22,7 +22,7 @@ const Header = () => {
       }}
     >
       <div className="flex items-center flex-shrink-0">
-        <Link to="hero" smooth={true} duration={500} className="cursor-pointer">
+        <Link to="hero" smooth={true} duration={500} className="cursor-pointer" aria-label="Scroll to Hero section">
           <img
             src={logo}
             alt="JAKE"

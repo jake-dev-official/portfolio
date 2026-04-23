@@ -58,6 +58,13 @@ const Projects = () => {
               />
               <div className="p-6">
                 <h3 className="text-2xl font-bold mb-2">{project.title}</h3>
+                <div className="flex flex-wrap justify-center gap-2 mb-4">
+                  {project.techStack && project.techStack.map((tech, idx) => (
+                    <span key={idx} className="bg-blue-600/20 text-blue-400 px-2 py-1 rounded-md text-xs font-semibold border border-blue-600/30">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
                 <p className="text-gray-400 mb-4">{project.description}</p>
                 <div className="flex justify-center space-x-4">
                   {project.liveUrl && project.liveUrl !== "#" && (
@@ -66,6 +73,7 @@ const Projects = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary hover:underline flex items-center gap-2"
+                      aria-label={`View Live Demo of ${project.title}`}
                     >
                       <FaExternalLinkAlt /> Live Demo
                     </a>
@@ -76,6 +84,7 @@ const Projects = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary hover:underline flex items-center gap-2"
+                      aria-label={`View GitHub Repository of ${project.title}`}
                     >
                       <FaGithub /> GitHub
                     </a>
