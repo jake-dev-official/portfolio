@@ -1,5 +1,23 @@
 [
   {
+    "title": "Voss",
+    "description": "A scalable full-stack AgriTech marketplace and supply chain platform empowering Ghana's agricultural ecosystem. Architected as a monorepo featuring a cross-platform mobile application (React Native & Expo), a modern web admin portal (React & Vite), and an Express/PostgreSQL backend with automated Mobile Money payment processing via Paystack, dynamic delivery routing via Swoove API, and hybrid cloud storage on Google Cloud Platform.",
+    "imageUrl": "projects/voss.png",
+    "liveUrl": "vossgh.com",
+    "githubUrl": "#",
+    "techStack": [
+      "React Native",
+      "Expo",
+      "React",
+      "Node.js",
+      "Express.js",
+      "PostgreSQL",
+      "Tailwind CSS",
+      "Paystack",
+      "Google Cloud"
+    ]
+  },
+  {
     "title": "YouTubeTweaks",
     "description": "YouTubeTweaks is an elite, minimalist browser extension designed to transform your YouTube experience into a high-performance productivity workspace. It combines native-feeling keyboard shortcuts with advanced layout optimizations and a professional-grade Cinematic Mode.",
     "imageUrl": "projects/spt.jpg",
