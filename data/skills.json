@@ -13,8 +13,24 @@
       "name": "JavaScript"
     },
     {
+      "icon": "SiTypescript",
+      "name": "TypeScript"
+    },
+    {
       "icon": "FaReact",
       "name": "React"
+    },
+    {
+      "icon": "FaReact",
+      "name": "React Native"
+    },
+    {
+      "icon": "SiExpo",
+      "name": "Expo"
+    },
+    {
+      "icon": "SiTailwindcss",
+      "name": "Tailwind CSS"
     },
     {
       "icon": "FaBootstrap",
@@ -25,20 +41,8 @@
       "name": "Material-UI"
     },
     {
-      "icon": "SiTailwindcss",
-      "name": "Tailwind CSS"
-    },
-    {
-      "name": "TypeScript ",
-      "icon": "SiTypescript"
-    },
-    {
-      "name": "Vite ",
-      "icon": "SiVite"
-    },
-    {
-      "name": "React Native / Expo",
-      "icon": "FaReact / SiExpo"
+      "icon": "SiVite",
+      "name": "Vite"
     }
   ],
   "backend": [
@@ -47,16 +51,32 @@
       "name": "Python"
     },
     {
+      "icon": "SiFastapi",
+      "name": "FastAPI"
+    },
+    {
+      "icon": "FaNodeJs",
+      "name": "Node.js"
+    },
+    {
+      "icon": "SiExpress",
+      "name": "Express.js"
+    },
+    {
       "icon": "FaPhp",
       "name": "PHP"
+    },
+    {
+      "icon": "SiPostgresql",
+      "name": "PostgreSQL"
     },
     {
       "icon": "SiMysql",
       "name": "MySQL"
     },
     {
-      "icon": "SiPostgresql",
-      "name": "PostgreSQL"
+      "icon": "SiSqlite",
+      "name": "SQLite"
     },
     {
       "icon": "SiMongodb",
@@ -65,18 +85,6 @@
     {
       "icon": "SiPrisma",
       "name": "Prisma"
-    },
-    {
-      "name": "Node.js",
-      "icon": "FaNodeJs"
-    },
-    {
-      "name": "Express.js",
-      "icon": "SiExpress"
-    },
-    {
-      "name": "FastAPI ",
-      "icon": "SiFastapi"
     }
   ]
 }
