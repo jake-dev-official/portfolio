@@ -1,19 +1,82 @@
 {
   "frontend": [
-    { "icon": "FaHtml5", "name": "HTML" },
-    { "icon": "FaCss3Alt", "name": "CSS" },
-    { "icon": "IoLogoJavascript", "name": "JavaScript" },
-    { "icon": "FaReact", "name": "React" },
-    { "icon": "FaBootstrap", "name": "Bootstrap" },
-    { "icon": "SiMui", "name": "Material-UI" },
-    { "icon": "SiTailwindcss", "name": "Tailwind CSS" }
+    {
+      "icon": "FaHtml5",
+      "name": "HTML"
+    },
+    {
+      "icon": "FaCss3Alt",
+      "name": "CSS"
+    },
+    {
+      "icon": "IoLogoJavascript",
+      "name": "JavaScript"
+    },
+    {
+      "icon": "FaReact",
+      "name": "React"
+    },
+    {
+      "icon": "FaBootstrap",
+      "name": "Bootstrap"
+    },
+    {
+      "icon": "SiMui",
+      "name": "Material-UI"
+    },
+    {
+      "icon": "SiTailwindcss",
+      "name": "Tailwind CSS"
+    },
+    {
+      "name": "TypeScript ",
+      "icon": "SiTypescript"
+    },
+    {
+      "name": "Vite ",
+      "icon": "SiVite"
+    },
+    {
+      "name": "React Native / Expo",
+      "icon": "FaReact / SiExpo"
+    }
   ],
   "backend": [
-    { "icon": "FaPython", "name": "Python" },
-    { "icon": "FaPhp", "name": "PHP" },
-    { "icon": "SiMysql", "name": "MySQL" },
-    { "icon": "SiPostgresql", "name": "PostgreSQL" },
-    { "icon": "SiMongodb", "name": "MongoDB" },
-    { "icon": "SiPrisma", "name": "Prisma" }
+    {
+      "icon": "FaPython",
+      "name": "Python"
+    },
+    {
+      "icon": "FaPhp",
+      "name": "PHP"
+    },
+    {
+      "icon": "SiMysql",
+      "name": "MySQL"
+    },
+    {
+      "icon": "SiPostgresql",
+      "name": "PostgreSQL"
+    },
+    {
+      "icon": "SiMongodb",
+      "name": "MongoDB"
+    },
+    {
+      "icon": "SiPrisma",
+      "name": "Prisma"
+    },
+    {
+      "name": "Node.js",
+      "icon": "FaNodeJs"
+    },
+    {
+      "name": "Express.js",
+      "icon": "SiExpress"
+    },
+    {
+      "name": "FastAPI ",
+      "icon": "SiFastapi"
+    }
   ]
 }
