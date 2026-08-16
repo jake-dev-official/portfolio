@@ -3,7 +3,7 @@
     "title": "Voss",
     "description": "A scalable full-stack AgriTech marketplace and supply chain platform empowering Ghana's agricultural ecosystem. Architected as a monorepo featuring a cross-platform mobile application (React Native & Expo), a modern web admin portal (React & Vite), and an Express/PostgreSQL backend with automated Mobile Money payment processing via Paystack, dynamic delivery routing via Swoove API, and hybrid cloud storage on Google Cloud Platform.",
     "imageUrl": "projects/voss.png",
-    "liveUrl": "vossgh.com",
+    "liveUrl": "https://www.vossgh.com/",
     "githubUrl": "#",
     "techStack": [
       "React Native",
