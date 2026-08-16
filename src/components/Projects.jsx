@@ -6,13 +6,13 @@ const containerVariants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.3,
+      staggerChildren: 0.15,
     },
   },
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 50 },
+  hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0 },
 };
 
@@ -36,64 +36,73 @@ const Projects = () => {
     <section id="projects" className="py-20 relative overflow-hidden">
       <div className="container mx-auto text-center relative z-10">
         <h2 className="text-4xl font-bold mb-12">My Work</h2>
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-        >
-          {projects.map((project, index) => (
-            <motion.div
-              key={index}
-              className="bg-gray-800 rounded-lg overflow-hidden shadow-lg"
-              variants={cardVariants}
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.3 }}
-            >
-              <img
-                src={project.imageUrl}
-                alt={project.title}
-                className="w-full h-56 object-cover"
-              />
-              <div className="p-6">
-                <h3 className="text-2xl font-bold mb-2">{project.title}</h3>
-                <div className="flex flex-wrap justify-center gap-2 mb-4">
-                  {project.techStack && project.techStack.map((tech, idx) => (
-                    <span key={idx} className="bg-blue-600/20 text-blue-400 px-2 py-1 rounded-md text-xs font-semibold border border-blue-600/30">
-                      {tech}
-                    </span>
-                  ))}
+        {projects.length > 0 ? (
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+          >
+            {projects.map((project, index) => (
+              <motion.div
+                key={index}
+                className="bg-gray-800 rounded-lg overflow-hidden shadow-lg flex flex-col"
+                variants={cardVariants}
+                whileHover={{ scale: 1.03 }}
+                transition={{ duration: 0.2 }}
+              >
+                <img
+                  src={project.imageUrl}
+                  alt={project.title}
+                  loading="lazy"
+                  className="w-full h-56 object-cover"
+                />
+                <div className="p-6 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold mb-2">{project.title}</h3>
+                    <div className="flex flex-wrap justify-center gap-2 mb-4">
+                      {project.techStack && project.techStack.map((tech, idx) => (
+                        <span key={idx} className="bg-blue-600/20 text-blue-400 px-2 py-1 rounded-md text-xs font-semibold border border-blue-600/30">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-gray-400 mb-4 text-sm md:text-base">{project.description}</p>
+                  </div>
+                  <div className="flex justify-center space-x-4 pt-2">
+                    {project.liveUrl && project.liveUrl !== "#" && (
+                      <a
+                        href={project.liveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline flex items-center gap-2"
+                        aria-label={`View Live Demo of ${project.title}`}
+                      >
+                        <FaExternalLinkAlt /> Live Demo
+                      </a>
+                    )}
+                    {project.githubUrl && project.githubUrl !== "#" && (
+                      <a
+                        href={project.githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline flex items-center gap-2"
+                        aria-label={`View GitHub Repository of ${project.title}`}
+                      >
+                        <FaGithub /> GitHub
+                      </a>
+                    )}
+                  </div>
                 </div>
-                <p className="text-gray-400 mb-4">{project.description}</p>
-                <div className="flex justify-center space-x-4">
-                  {project.liveUrl && project.liveUrl !== "#" && (
-                    <a
-                      href={project.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline flex items-center gap-2"
-                      aria-label={`View Live Demo of ${project.title}`}
-                    >
-                      <FaExternalLinkAlt /> Live Demo
-                    </a>
-                  )}
-                  {project.githubUrl && project.githubUrl !== "#" && (
-                    <a
-                      href={project.githubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline flex items-center gap-2"
-                      aria-label={`View GitHub Repository of ${project.title}`}
-                    >
-                      <FaGithub /> GitHub
-                    </a>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          <div className="flex justify-center items-center py-16">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        )}
       </div>
     </section>
   );

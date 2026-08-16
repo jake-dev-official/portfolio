@@ -13,10 +13,28 @@ const DarkSwal = Swal.mixin({
     }
 });
 
+const parseRepo = (raw) => {
+    if (!raw) return { owner: '', repo: '' };
+    const clean = raw.trim()
+        .replace(/^https?:\/\/github\.com\//i, '')
+        .replace(/\.git$/i, '')
+        .replace(/^\/+|\/+$/g, '');
+    const parts = clean.split('/');
+    if (parts.length >= 2) {
+        return { owner: parts[0].trim(), repo: parts[1].trim() };
+    }
+    return { owner: parts[0]?.trim() || '', repo: '' };
+};
+
 const Admin = () => {
     const [token, setToken] = useState(localStorage.getItem('github_token') || '');
     const [repo, setRepo] = useState(localStorage.getItem('github_repo') || '');
-    const [isAuthenticated, setIsAuthenticated] = useState(!!token && !!repo);
+    const [isAuthenticated, setIsAuthenticated] = useState(() => {
+        const t = localStorage.getItem('github_token') || '';
+        const r = localStorage.getItem('github_repo') || '';
+        const { owner, repo: repoName } = parseRepo(r);
+        return !!t && !!owner && !!repoName;
+    });
     const [projects, setProjects] = useState([]);
     const [skills, setSkills] = useState({ frontend: [], backend: [] });
     const [fileSha, setFileSha] = useState('');
@@ -25,6 +43,7 @@ const Admin = () => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [editingIndex, setEditingIndex] = useState(null);
+    const [hasUnsavedDeletes, setHasUnsavedDeletes] = useState(false);
     const formRef = useRef(null);
 
     // Form State
@@ -37,10 +56,16 @@ const Admin = () => {
     const [newSkill, setNewSkill] = useState({ name: '', icon: '', category: 'frontend' });
     const [editingSkillIndex, setEditingSkillIndex] = useState(null);
 
-    const getOctokit = () => new Octokit({ auth: token });
+    const getOctokit = () => new Octokit({ auth: token.trim() });
 
     useEffect(() => {
         if (isAuthenticated) {
+            const { owner, repo: repoName } = parseRepo(repo);
+            if (!owner || !repoName) {
+                handleLogout();
+                DarkSwal.fire('Invalid Repository', 'Please enter your repository in the format "username/repository" (e.g. jake-dev-official/portfolio).', 'warning');
+                return;
+            }
             loadProjects();
             loadSkills();
             loadResumeInfo();
@@ -49,8 +74,17 @@ const Admin = () => {
 
     const handleLogin = (e) => {
         e.preventDefault();
-        localStorage.setItem('github_token', token);
-        localStorage.setItem('github_repo', repo);
+        const { owner, repo: repoName } = parseRepo(repo);
+        if (!owner || !repoName) {
+            DarkSwal.fire('Invalid Repository', 'Please enter your repository in the format "username/repository" (e.g. jake-dev-official/portfolio).', 'warning');
+            return;
+        }
+        const cleanRepo = `${owner}/${repoName}`;
+        const cleanToken = token.trim();
+        localStorage.setItem('github_token', cleanToken);
+        localStorage.setItem('github_repo', cleanRepo);
+        setRepo(cleanRepo);
+        setToken(cleanToken);
         setIsAuthenticated(true);
     };
 
@@ -62,6 +96,7 @@ const Admin = () => {
         setIsAuthenticated(false);
         setProjects([]);
         setMessage('');
+        setHasUnsavedDeletes(false);
     };
 
     const loadProjects = async () => {
@@ -69,16 +104,17 @@ const Admin = () => {
         setMessage('');
         try {
             const octokit = getOctokit();
-            const [owner, _repo] = repo.split('/');
+            const { owner, repo: repoName } = parseRepo(repo);
             const { data } = await octokit.rest.repos.getContent({
                 owner,
-                repo: _repo,
+                repo: repoName,
                 path: 'public/data/projects.json',
             });
             // Decode base64
             const content = decodeURIComponent(escape(atob(data.content)));
             setProjects(JSON.parse(content));
             setFileSha(data.sha);
+            setHasUnsavedDeletes(false);
         } catch (error) {
             console.error(error);
             setMessage('Failed to load projects. Check repository name and token permissions.');
@@ -90,10 +126,10 @@ const Admin = () => {
     const loadSkills = async () => {
         try {
             const octokit = getOctokit();
-            const [owner, _repo] = repo.split('/');
+            const { owner, repo: repoName } = parseRepo(repo);
             const { data } = await octokit.rest.repos.getContent({
                 owner,
-                repo: _repo,
+                repo: repoName,
                 path: 'public/data/skills.json',
             });
             const content = decodeURIComponent(escape(atob(data.content)));
@@ -107,10 +143,10 @@ const Admin = () => {
     const loadResumeInfo = async () => {
         try {
             const octokit = getOctokit();
-            const [owner, _repo] = repo.split('/');
+            const { owner, repo: repoName } = parseRepo(repo);
             const { data } = await octokit.rest.repos.getContent({
                 owner,
-                repo: _repo,
+                repo: repoName,
                 path: 'public/Jerry_Anane_CV.pdf',
             });
             setResumeSha(data.sha);
@@ -154,7 +190,8 @@ const Admin = () => {
                 : newProject.techStack,
             _pendingImageBase64: newProject.imageFileBase64,
             _pendingImageName: newProject.imageFileName,
-            _preview: newProject.displayUrl // Stays in state for dashboard preview
+            _preview: newProject.displayUrl,
+            _isUnsaved: true
         };
 
         if (editingIndex !== null) {
@@ -163,11 +200,11 @@ const Admin = () => {
             setProjects(updatedProjects);
             setEditingIndex(null);
             setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', techStack: '', imageFileBase64: null, imageFileName: '', displayUrl: '' });
-            DarkSwal.fire('Updated!', 'Project modified locally. Remember to click Sync!', 'success');
+            DarkSwal.fire('Updated Locally!', 'Project updated locally (amber text). Click "Sync & Deploy" to publish.', 'success');
         } else {
             setProjects([projectToAdd, ...projects]);
             setNewProject({ title: '', description: '', imageUrl: '', liveUrl: '', githubUrl: '', techStack: '', imageFileBase64: null, imageFileName: '', displayUrl: '' });
-            DarkSwal.fire('Added!', 'New project added locally. Remember to click Sync!', 'success');
+            DarkSwal.fire('Staged Locally!', 'New project added locally (amber text). Click "Sync & Deploy" to publish.', 'success');
         }
     };
 
@@ -177,15 +214,16 @@ const Admin = () => {
             text: "It will be removed locally. Click 'Sync & Deploy' to finalize.",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#dc2626', // bg-red-600 overrides the default blue mixin
+            confirmButtonColor: '#dc2626',
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
                 const newProjects = [...projects];
                 newProjects.splice(index, 1);
                 setProjects(newProjects);
+                setHasUnsavedDeletes(true);
                 if (editingIndex === index) cancelEdit();
-                DarkSwal.fire('Deleted!', 'Project removed locally. Remember to click Sync!', 'success');
+                DarkSwal.fire('Deleted Locally!', 'Project removed locally. Click Sync & Deploy to finalize.', 'success');
             }
         });
     };
@@ -214,27 +252,30 @@ const Admin = () => {
             return;
         }
         const updatedSkills = { ...skills };
+        const skillObj = { name: newSkill.name, icon: newSkill.icon, _isUnsaved: true };
+
         if (editingSkillIndex !== null) {
             const { category, index } = editingSkillIndex;
-            // If category changed, remove from old, add to new
             if (category !== newSkill.category) {
                 updatedSkills[category].splice(index, 1);
-                updatedSkills[newSkill.category].push({ name: newSkill.name, icon: newSkill.icon });
+                updatedSkills[newSkill.category].push(skillObj);
             } else {
-                updatedSkills[category][index] = { name: newSkill.name, icon: newSkill.icon };
+                updatedSkills[category][index] = skillObj;
             }
             setEditingSkillIndex(null);
         } else {
-            updatedSkills[newSkill.category].push({ name: newSkill.name, icon: newSkill.icon });
+            updatedSkills[newSkill.category].push(skillObj);
         }
         setSkills(updatedSkills);
         setNewSkill({ name: '', icon: '', category: 'frontend' });
+        DarkSwal.fire('Staged Locally!', 'Skill updated locally (amber text). Click "Sync & Deploy" to publish.', 'success');
     };
 
     const deleteSkill = (category, index) => {
         const updatedSkills = { ...skills };
         updatedSkills[category].splice(index, 1);
         setSkills(updatedSkills);
+        setHasUnsavedDeletes(true);
     };
 
     const editSkill = (category, index) => {
@@ -254,11 +295,11 @@ const Admin = () => {
             reader.onloadend = async () => {
                 const base64String = reader.result.replace('data:', '').replace(/^.+,/, '');
                 const octokit = getOctokit();
-                const [owner, _repo] = repo.split('/');
+                const { owner, repo: repoName } = parseRepo(repo);
 
                 const res = await octokit.rest.repos.createOrUpdateFileContents({
                     owner,
-                    repo: _repo,
+                    repo: repoName,
                     path: 'public/Jerry_Anane_CV.pdf',
                     message: 'CMS: Update Resume',
                     content: base64String,
@@ -287,7 +328,7 @@ const Admin = () => {
 
         try {
             const octokit = getOctokit();
-            const [owner, _repo] = repo.split('/');
+            const { owner, repo: repoName } = parseRepo(repo);
 
             // 1. Process all projects and upload images if needed
             for (const proj of projects) {
@@ -298,7 +339,7 @@ const Admin = () => {
                         try {
                             const res = await octokit.rest.repos.getContent({
                                 owner,
-                                repo: _repo,
+                                repo: repoName,
                                 path: `public/projects/${proj._pendingImageName}`
                             });
                             imageSha = res.data.sha;
@@ -309,7 +350,7 @@ const Admin = () => {
 
                         const uploadRes = await octokit.rest.repos.createOrUpdateFileContents({
                             owner,
-                            repo: _repo,
+                            repo: repoName,
                             path: `public/projects/${proj._pendingImageName}`,
                             message: `CMS: Add image for project "${proj.title}"`,
                             content: proj._pendingImageBase64,
@@ -347,12 +388,12 @@ const Admin = () => {
 
             // 2. Update projects.json
             setMessage('Saving projects.json...');
-            const cleanProjects = projects.map(({ _pendingImageBase64, _pendingImageName, _preview, ...rest }) => rest);
+            const cleanProjects = projects.map(({ _pendingImageBase64, _pendingImageName, _preview, _isUnsaved, ...rest }) => rest);
             const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(cleanProjects, null, 2))));
 
             const { data } = await octokit.rest.repos.createOrUpdateFileContents({
                 owner,
-                repo: _repo,
+                repo: repoName,
                 path: 'public/data/projects.json',
                 message: 'CMS: Update projects catalog',
                 content: contentBase64,
@@ -365,20 +406,26 @@ const Admin = () => {
 
             // 3. Update skills.json
             setMessage('Saving skills.json...');
-            const skillsContentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(skills, null, 2))));
+            const cleanSkills = {
+                frontend: (skills.frontend || []).map(({ _isUnsaved, ...rest }) => rest),
+                backend: (skills.backend || []).map(({ _isUnsaved, ...rest }) => rest)
+            };
+            const skillsContentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(cleanSkills, null, 2))));
             const skillsRes = await octokit.rest.repos.createOrUpdateFileContents({
                 owner,
-                repo: _repo,
+                repo: repoName,
                 path: 'public/data/skills.json',
                 message: 'CMS: Update skills catalog',
                 content: skillsContentBase64,
                 sha: skillsSha
             });
             setSkillsSha(skillsRes.data.content.sha);
+            setSkills(cleanSkills);
+            setHasUnsavedDeletes(false);
 
             DarkSwal.fire({
-                title: '🎉 Sync Succesful!',
-                html: `<p>Catalog and skills updated successfully.</p>${uploadedImages.length > 0 ? `<p class="text-sm text-green-400 mt-2">Images Uploaded: ${uploadedImages.join(', ')}</p>` : ''}`,
+                title: '🎉 Sync Successful!',
+                html: `<p>All changes deployed to GitHub.</p>${uploadedImages.length > 0 ? `<p class="text-sm text-green-400 mt-2">Images Uploaded: ${uploadedImages.join(', ')}</p>` : ''}`,
                 icon: 'success'
             });
             setMessage('');
@@ -412,14 +459,23 @@ const Admin = () => {
         );
     }
 
+    const unsavedProjectsCount = projects.filter(p => p._isUnsaved).length;
+    const unsavedSkillsCount = (skills.frontend?.filter(s => s._isUnsaved).length || 0) + (skills.backend?.filter(s => s._isUnsaved).length || 0);
+    const totalUnsavedCount = unsavedProjectsCount + unsavedSkillsCount + (hasUnsavedDeletes ? 1 : 0);
+
     return (
-        <div className="bg-gray-900 min-h-screen text-white p-8">
+        <div className="bg-gray-900 min-h-screen text-white p-4 md:p-8">
             <div className="max-w-5xl mx-auto">
-                <div className="flex justify-between items-center mb-8 bg-gray-800 p-4 rounded">
-                    <h1 className="text-2xl font-bold">Portfolio Dashboard</h1>
-                    <button onClick={handleLogout} className="flex items-center gap-2 bg-red-600 px-4 py-2 rounded hover:bg-red-500 transition-colors">
-                        <FaSignOutAlt /> Sign Out
-                    </button>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 bg-gray-800 p-4 rounded">
+                    <div>
+                        <h1 className="text-2xl font-bold">Portfolio Dashboard</h1>
+                        <p className="text-xs text-gray-400 mt-0.5">Repo: {repo}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <button onClick={handleLogout} className="flex items-center gap-2 bg-red-600/80 hover:bg-red-600 px-4 py-2 rounded text-sm font-semibold transition-colors">
+                            <FaSignOutAlt /> Sign Out
+                        </button>
+                    </div>
                 </div>
 
                 {message && (
@@ -499,8 +555,15 @@ const Admin = () => {
                             <h3 className="font-bold mb-4 text-gray-400 uppercase tracking-wider text-sm">Frontend Skills</h3>
                             <div className="space-y-2">
                                 {skills.frontend.map((s, idx) => (
-                                    <div key={idx} className="flex justify-between items-center bg-gray-700/50 p-2 rounded">
-                                        <span>{s.name} ({s.icon})</span>
+                                    <div key={idx} className={`flex justify-between items-center p-2 rounded transition-all duration-300 ${s._isUnsaved ? 'bg-amber-500/10 border border-amber-500/30' : 'bg-gray-700/50 border border-transparent'}`}>
+                                        <span className={`font-medium ${s._isUnsaved ? 'text-amber-300' : 'text-white'}`}>
+                                            {s.name} <span className="text-xs opacity-70">({s.icon})</span>
+                                            {s._isUnsaved && (
+                                                <span className="ml-2 text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/40">
+                                                    Unsaved
+                                                </span>
+                                            )}
+                                        </span>
                                         <div className="flex gap-2">
                                             <button onClick={() => editSkill('frontend', idx)} className="text-blue-400 hover:text-blue-300" aria-label={`Edit ${s.name} Skill`} title="Edit Skill"><FaEdit /></button>
                                             <button onClick={() => deleteSkill('frontend', idx)} className="text-red-400 hover:text-red-300" aria-label={`Delete ${s.name} Skill`} title="Delete Skill"><FaTrash /></button>
@@ -513,8 +576,15 @@ const Admin = () => {
                             <h3 className="font-bold mb-4 text-gray-400 uppercase tracking-wider text-sm">Backend Skills</h3>
                             <div className="space-y-2">
                                 {skills.backend.map((s, idx) => (
-                                    <div key={idx} className="flex justify-between items-center bg-gray-700/50 p-2 rounded">
-                                        <span>{s.name} ({s.icon})</span>
+                                    <div key={idx} className={`flex justify-between items-center p-2 rounded transition-all duration-300 ${s._isUnsaved ? 'bg-amber-500/10 border border-amber-500/30' : 'bg-gray-700/50 border border-transparent'}`}>
+                                        <span className={`font-medium ${s._isUnsaved ? 'text-amber-300' : 'text-white'}`}>
+                                            {s.name} <span className="text-xs opacity-70">({s.icon})</span>
+                                            {s._isUnsaved && (
+                                                <span className="ml-2 text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/40">
+                                                    Unsaved
+                                                </span>
+                                            )}
+                                        </span>
                                         <div className="flex gap-2">
                                             <button onClick={() => editSkill('backend', idx)} className="text-blue-400 hover:text-blue-300" aria-label={`Edit ${s.name} Skill`} title="Edit Skill"><FaEdit /></button>
                                             <button onClick={() => deleteSkill('backend', idx)} className="text-red-400 hover:text-red-300" aria-label={`Delete ${s.name} Skill`} title="Delete Skill"><FaTrash /></button>
@@ -528,9 +598,28 @@ const Admin = () => {
 
                 {/* Projects List */}
                 <div className="bg-gray-800 p-6 rounded shadow-lg">
-                    <div className="flex justify-between items-center mb-6 border-b border-gray-700 pb-2">
-                        <h2 className="text-xl font-semibold">Current Projects</h2>
-                        <button onClick={saveChangesToGitHub} disabled={loading} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded font-bold disabled:opacity-50">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-gray-700 pb-4">
+                        <div>
+                            <h2 className="text-xl font-semibold">Current Projects</h2>
+                            <div className="mt-1">
+                                {totalUnsavedCount > 0 ? (
+                                    <span className="inline-flex items-center gap-1.5 text-xs text-amber-300 font-medium">
+                                        <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                                        {totalUnsavedCount} unsaved {totalUnsavedCount === 1 ? 'change' : 'changes'} staged locally
+                                    </span>
+                                ) : (
+                                    <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                        All changes synced with GitHub
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        <button
+                            onClick={saveChangesToGitHub}
+                            disabled={loading}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded font-bold transition-all shadow-lg text-white disabled:opacity-50 ${totalUnsavedCount > 0 ? 'bg-amber-600 hover:bg-amber-500' : 'bg-blue-600 hover:bg-blue-500'}`}
+                        >
                             <FaSave /> {loading ? "Syncing..." : "Sync & Deploy to GitHub"}
                         </button>
                     </div>
@@ -540,7 +629,10 @@ const Admin = () => {
                     ) : (
                         <div className="grid grid-cols-1 gap-4">
                             {projects.map((proj, idx) => (
-                                <div key={idx} className="flex items-center bg-gray-700 p-4 rounded gap-4 overflow-hidden shadow">
+                                <div
+                                    key={idx}
+                                    className={`flex items-center bg-gray-700 p-4 rounded gap-4 overflow-hidden shadow transition-all duration-300 ${proj._isUnsaved ? 'border border-amber-500/50 bg-gray-700/90' : 'border border-transparent'}`}
+                                >
                                     {(proj._preview || proj.imageUrl) && (
                                         <img
                                             src={proj._preview || (proj.imageUrl.startsWith('http') ? proj.imageUrl : proj.imageUrl.startsWith('/') ? proj.imageUrl.substring(1) : proj.imageUrl)}
@@ -550,10 +642,17 @@ const Admin = () => {
                                     )}
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <h3 className="font-bold text-white truncate">{proj.title}</h3>
+                                            <h3 className={`font-bold truncate transition-colors ${proj._isUnsaved ? 'text-amber-300' : 'text-white'}`}>
+                                                {proj.title}
+                                            </h3>
+                                            {proj._isUnsaved && (
+                                                <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/40 flex flex-wrap shrink-0 font-medium">
+                                                    Unsaved
+                                                </span>
+                                            )}
                                             {proj._pendingImageBase64 && (
                                                 <span className="text-[10px] bg-blue-600/30 text-blue-400 px-1.5 py-0.5 rounded border border-blue-600/50 flex flex-wrap shrink-0">
-                                                    Pending Sync
+                                                    New Image
                                                 </span>
                                             )}
                                         </div>

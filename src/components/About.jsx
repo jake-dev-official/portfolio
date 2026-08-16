@@ -1,19 +1,87 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import * as FaIcons from 'react-icons/fa';
-import * as IoIcons from 'react-icons/io5';
-import * as SiIcons from 'react-icons/si';
+import {
+  FaHtml5,
+  FaCss3Alt,
+  FaReact,
+  FaBootstrap,
+  FaPython,
+  FaPhp,
+  FaNodeJs,
+  FaDocker,
+  FaGitAlt,
+  FaJava,
+  FaCode,
+} from 'react-icons/fa';
+import {
+  IoLogoJavascript,
+} from 'react-icons/io5';
+import {
+  SiMui,
+  SiTailwindcss,
+  SiMysql,
+  SiPostgresql,
+  SiMongodb,
+  SiPrisma,
+  SiTypescript,
+  SiNextdotjs,
+  SiExpress,
+  SiGraphql,
+  SiRedis,
+  SiFirebase,
+  SiFastapi,
+  SiDjango,
+  SiFlask,
+  SiVite,
+  SiCplusplus,
+  SiCsharp,
+  SiFigma,
+} from 'react-icons/si';
+
+const iconMap = {
+  FaHtml5,
+  FaCss3Alt,
+  FaReact,
+  FaBootstrap,
+  FaPython,
+  FaPhp,
+  FaNodeJs,
+  FaDocker,
+  FaGitAlt,
+  FaJava,
+  FaCode,
+  IoLogoJavascript,
+  SiMui,
+  SiTailwindcss,
+  SiMysql,
+  SiPostgresql,
+  SiMongodb,
+  SiPrisma,
+  SiTypescript,
+  SiNextdotjs,
+  SiExpress,
+  SiGraphql,
+  SiRedis,
+  SiFirebase,
+  SiFastapi,
+  SiDjango,
+  SiFlask,
+  SiVite,
+  SiCplusplus,
+  SiCsharp,
+  SiFigma,
+};
 
 const getIcon = (iconName) => {
-  const IconComponent = FaIcons[iconName] || IoIcons[iconName] || SiIcons[iconName];
-  return IconComponent ? <IconComponent /> : null;
+  const IconComponent = iconMap[iconName] || FaCode;
+  return <IconComponent />;
 };
 
 const skillCategoryVariants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.2,
+      staggerChildren: 0.15,
     },
   },
 };
@@ -56,37 +124,49 @@ const About = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
           <div>
             <h4 className="text-2xl font-semibold mb-6">Frontend</h4>
-            <motion.div 
-              className="flex flex-wrap justify-center gap-8"
-              variants={skillCategoryVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-            >
-              {skills.frontend.map((skill, index) => (
-                <motion.div key={index} className="flex flex-col items-center gap-2 p-4 bg-gray-800 rounded-lg w-32" variants={skillItemVariants}>
-                  <div className="text-5xl text-primary">{getIcon(skill.icon)}</div>
-                  <span className="font-medium">{skill.name}</span>
-                </motion.div>
-              ))}
-            </motion.div>
+            {skills.frontend && skills.frontend.length > 0 ? (
+              <motion.div 
+                className="flex flex-wrap justify-center gap-8"
+                variants={skillCategoryVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.1 }}
+              >
+                {skills.frontend.map((skill, index) => (
+                  <motion.div key={index} className="flex flex-col items-center gap-2 p-4 bg-gray-800 rounded-lg w-32" variants={skillItemVariants}>
+                    <div className="text-5xl text-primary">{getIcon(skill.icon)}</div>
+                    <span className="font-medium">{skill.name}</span>
+                  </motion.div>
+                ))}
+              </motion.div>
+            ) : (
+              <div className="flex justify-center items-center py-8">
+                <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
           </div>
           <div>
             <h4 className="text-2xl font-semibold mb-6">Backend & Databases</h4>
-            <motion.div 
-              className="flex flex-wrap justify-center gap-8"
-              variants={skillCategoryVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-            >
-              {skills.backend.map((skill, index) => (
-                <motion.div key={index} className="flex flex-col items-center gap-2 p-4 bg-gray-800 rounded-lg w-32" variants={skillItemVariants}>
-                  <div className="text-5xl text-secondary">{getIcon(skill.icon)}</div>
-                  <span className="font-medium">{skill.name}</span>
-                </motion.div>
-              ))}
-            </motion.div>
+            {skills.backend && skills.backend.length > 0 ? (
+              <motion.div 
+                className="flex flex-wrap justify-center gap-8"
+                variants={skillCategoryVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.1 }}
+              >
+                {skills.backend.map((skill, index) => (
+                  <motion.div key={index} className="flex flex-col items-center gap-2 p-4 bg-gray-800 rounded-lg w-32" variants={skillItemVariants}>
+                    <div className="text-5xl text-secondary">{getIcon(skill.icon)}</div>
+                    <span className="font-medium">{skill.name}</span>
+                  </motion.div>
+                ))}
+              </motion.div>
+            ) : (
+              <div className="flex justify-center items-center py-8">
+                <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
           </div>
         </div>
       </div>

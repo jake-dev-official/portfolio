@@ -14,8 +14,8 @@ const Hero = () => {
 
   return (
     <section id="hero" className="min-h-screen flex items-center">
-      <div className="container mx-auto flex flex-col md:flex-row items-center">
-        <div className="md:w-3/5 text-center md:text-left mb-10 md:mb-0">
+      <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="w-full md:w-1/2 lg:w-3/5 text-center md:text-left mb-6 md:mb-0">
           <motion.h1 
             className="text-5xl md:text-7xl font-bold mb-4"
             initial="hidden"
@@ -46,7 +46,7 @@ const Hero = () => {
             </a>
           </motion.div>
         </div>
-        <div className="md:w-2/5 h-96 md:h-auto">
+        <div className="w-full md:w-1/2 lg:w-2/5 h-72 md:h-[380px] lg:h-[450px] flex items-center justify-center">
           <SpinningShape />
         </div>
       </div>
