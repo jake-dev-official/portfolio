@@ -179,12 +179,18 @@ const Admin = () => {
             DarkSwal.fire('Error', 'Project title is required!', 'error');
             return;
         }
+        const formatInputUrl = (val) => {
+            if (!val || val.trim() === '' || val === '#') return '#';
+            const clean = val.trim();
+            return clean.startsWith('http://') || clean.startsWith('https://') ? clean : `https://${clean}`;
+        };
+
         const projectToAdd = {
             title: newProject.title,
             description: newProject.description,
             imageUrl: newProject.imageUrl,
-            liveUrl: newProject.liveUrl || '#',
-            githubUrl: newProject.githubUrl || '#',
+            liveUrl: formatInputUrl(newProject.liveUrl),
+            githubUrl: formatInputUrl(newProject.githubUrl),
             techStack: typeof newProject.techStack === 'string'
                 ? newProject.techStack.split(',').map(s => s.trim()).filter(s => s !== '')
                 : newProject.techStack,

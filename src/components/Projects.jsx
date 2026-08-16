@@ -16,6 +16,12 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
+const formatUrl = (url) => {
+  if (!url || url === "#") return "#";
+  const trimmed = url.trim();
+  return trimmed.startsWith("http://") || trimmed.startsWith("https://") ? trimmed : `https://${trimmed}`;
+};
+
 const Projects = () => {
   const [projects, setProjects] = useState([]);
 
@@ -73,7 +79,7 @@ const Projects = () => {
                   <div className="flex justify-center space-x-4 pt-2">
                     {project.liveUrl && project.liveUrl !== "#" && (
                       <a
-                        href={project.liveUrl}
+                        href={formatUrl(project.liveUrl)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary hover:underline flex items-center gap-2"
@@ -84,7 +90,7 @@ const Projects = () => {
                     )}
                     {project.githubUrl && project.githubUrl !== "#" && (
                       <a
-                        href={project.githubUrl}
+                        href={formatUrl(project.githubUrl)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary hover:underline flex items-center gap-2"
