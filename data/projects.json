@@ -4,62 +4,71 @@
     "description": "YouTubeTweaks is an elite, minimalist browser extension designed to transform your YouTube experience into a high-performance productivity workspace. It combines native-feeling keyboard shortcuts with advanced layout optimizations and a professional-grade Cinematic Mode.",
     "imageUrl": "projects/spt.jpg",
     "liveUrl": "#",
-    "githubUrl": "https://github.com/jake-dev-official/youtube-tweaks.git"
+    "githubUrl": "https://github.com/jake-dev-official/youtube-tweaks.git",
+    "techStack": []
   },
   {
     "title": "Gemini Logo Animation",
     "description": "A web-based recreation of the Gemini generative identity. This project showcases fluid motion design, advanced SVG/CSS filtering, and adaptive performance rendering.",
     "imageUrl": "projects/gemini.webp",
     "liveUrl": "https://jake-dev-official.github.io/gemini-logo-animation/",
-    "githubUrl": "https://github.com/jake-dev-official/gemini-logo-animation"
+    "githubUrl": "https://github.com/jake-dev-official/gemini-logo-animation",
+    "techStack": []
   },
   {
     "title": "Ada Technical Institute",
     "description": "A responsive school platform built with HTML, CSS, and JavaScript to manage news updates and event galleries. It features a PHP and MySQL backend to handle departmental information, academic resources, and public staff directories for students and parents",
     "imageUrl": "projects/adatech.webp",
     "liveUrl": "https://adatech.infy.uk/?i=1",
-    "githubUrl": "#"
+    "githubUrl": "#",
+    "techStack": []
   },
   {
     "title": "Nextgen CFO",
     "description": "A modern CFO website, built with React and a modern UI library to provide key insights.",
     "imageUrl": "projects/nextgen.webp",
     "liveUrl": "https://nextgencfo.netlify.app/",
-    "githubUrl": "#"
+    "githubUrl": "#",
+    "techStack": []
   },
   {
     "title": "SkyGlow Construction",
     "description": "A professional website for a construction company, showcasing their portfolio and services.",
     "imageUrl": "projects/skyglow.webp",
     "liveUrl": "#",
-    "githubUrl": "#"
+    "githubUrl": "#",
+    "techStack": []
   },
   {
     "title": "Logi Transport Hub",
     "description": "A logistics and transportation management system for tracking shipments and managing fleets.",
     "imageUrl": "projects/logitransport.webp",
     "liveUrl": "#",
-    "githubUrl": "#"
+    "githubUrl": "#",
+    "techStack": []
   },
   {
     "title": "Feedback Hub 360",
     "description": "A comprehensive feedback management system built with React, FastAPI, and PostgreSQL with Prisma ORM for organizational feedback collection and analysis.",
     "imageUrl": "projects/feedbackhub360.webp",
     "liveUrl": "#",
-    "githubUrl": "https://github.com/jake-dev-official/Feedback-Hub-360"
+    "githubUrl": "https://github.com/jake-dev-official/Feedback-Hub-360",
+    "techStack": []
   },
   {
     "title": "Sales & Inventory Management",
     "description": "A lightweight, offline desktop application designed for seamless small-scale stock management. Built with Python and Tkinter, it automates sales processing and PDF invoice generation while leveraging Excel for flexible data portability. Key features include real-time stock validation and a dedicated module for tracking customer debt.",
     "imageUrl": "projects/salesinventory.webp",
     "liveUrl": "#",
-    "githubUrl": "https://github.com/jake-dev-official/sales-inventory"
+    "githubUrl": "https://github.com/jake-dev-official/sales-inventory",
+    "techStack": []
   },
   {
     "title": "JAKE Retro Download Manager",
     "description": "A desktop application built with Python for managing and accelerating file downloads with a retro UI.",
     "imageUrl": "projects/retromanager.webp",
     "liveUrl": "#",
-    "githubUrl": "#"
+    "githubUrl": "#",
+    "techStack": []
   }
 ]
