@@ -36,6 +36,10 @@ import {
   SiCplusplus,
   SiCsharp,
   SiFigma,
+  SiSqlite,
+  SiExpo,
+  SiGooglecloud,
+  SiPostman,
 } from 'react-icons/si';
 
 const iconMap = {
@@ -70,6 +74,10 @@ const iconMap = {
   SiCplusplus,
   SiCsharp,
   SiFigma,
+  SiSqlite,
+  SiExpo,
+  SiGooglecloud,
+  SiPostman,
 };
 
 const getIcon = (iconName) => {
