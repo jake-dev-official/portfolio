@@ -313,7 +313,7 @@ const Admin = () => {
                 });
 
                 setResumeSha(res.data.content.sha);
-                DarkSwal.fire('Success', 'Resume updated successfully!', 'success');
+                DarkSwal.fire('Success', 'Resume updated successfully on GitHub!', 'success');
                 setMessage('');
                 setLoading(false);
             };
